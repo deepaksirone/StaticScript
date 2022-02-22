@@ -72,7 +72,7 @@ try {
         mkdirSync(outputPath);
     }
 
-    llvm.writeBitcodeToFile(llvmModule, path.join(outputPath, 'main.bc'));
+    llvm.writeBitcodeToFile(llvmModule, path.join(outputPath, 'main_unopt.bc'));
 
     const optimizationLevel = `-O${cliOptions.optimizationLevel}`;
 
@@ -83,7 +83,7 @@ try {
     {
         const output = executeOptSync([
             optimizationLevel,
-            path.join(outputPath, 'main.bc'),
+            path.join(outputPath, 'main_unopt.bc'),
             '-o', path.join(outputPath, 'main.bc')
         ]);
 

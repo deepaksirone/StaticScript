@@ -452,6 +452,9 @@ export function passNode(node: ts.Node, ctx: Context, builder: llvm.IRBuilder) {
         case ts.SyntaxKind.Block:
             passBlockStatement(<any>node, ctx, builder);
             break;
+	case ts.SyntaxKind.IfStatement:
+	    passStatement(<any>node, ctx, builder);
+            break;
     }
 }
 

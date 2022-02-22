@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@static-script/runtime": "^0.11.0",
-    "llvm-node": "github:MichaReiser/llvm-node#bc90d33a97c750447697a1330f3fe6517942ea16",
+    "llvm-node": "github:MichaReiser/llvm-node#bb1de20f1776c5f3cb9293dd3ef984e698ad2274",
     "typescript": "3.6.3"
   }
 }
