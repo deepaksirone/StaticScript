@@ -317,7 +317,40 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
             return new TypeOfExpressionCodeGenerator().generate(block as ts.TypeOfExpression, ctx, builder);
         case ts.SyntaxKind.ParenthesizedExpression:
             return buildFromExpression((<ts.ParenthesizedExpression>block).expression, ctx, builder);
+	case ts.SyntaxKind.ObjectLiteralExpression:
+	    // Create a map and store it in a variable here
+            // Put the variable in global scope so that it can be retrieved later
+	    const properties = (<ts.ObjectLiteralExpression>block).properties;
+            for (let prop of properties) {
+		switch (prop.kind) {
+	            case ts.SyntaxKind.PropertyAssignment:
+			// Supporting string to string maps
+			// TODO: More map types
+			const v : ts.PropertyAssignment = prop as ts.PropertyAssignment;
+			console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 
+                        	name expr text: ${(<ts.StringLiteral>v.name).text},
+                        	assgn expr text: ${(<ts.StringLiteral>v.initializer).text}`);
+			const key = (<ts.StringLiteral>v.name).text;
+			const value = (<ts.StringLiteral>v.initializer).text;
+						
+
+			break;	
+	 	    default:
+		    	throw new UnsupportedError(
+	    			block,
+				`Unsupported property: "${ts.SyntaxKind[prop.kind]}"`);
+		}
+            }
+	    break;
         default:
+	    console.trace();
+	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);
+            //const v = (<ts.ObjectLiteralExpression<ts.ObjectLiteralElementLike>>block).properties[5].name;
+	    const v : ts.PropertyAssignment = (<ts.ObjectLiteralExpression>block).properties[5] as ts.PropertyAssignment;
+            console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 
+			name expr text: ${(<ts.StringLiteral>v.name).text},
+			assgn expr text: ${(<ts.StringLiteral>v.initializer).text}`);
+	    
             throw new UnsupportedError(
                 block,
                 `Unsupported Expression.type: "${block.kind}"`
