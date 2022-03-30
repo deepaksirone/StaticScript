@@ -27,11 +27,15 @@ export class WhileStatementGenerator implements NodeGenerateInterface<ts.WhileSt
             next
         );
 
+	ctx.scope.breakBlock = next;
+        ctx.scope.continueBlock = conditionBlock;
+
         builder.setInsertionPoint(positiveBlock);
         passStatement(<any>node.statement, ctx, builder);
 
-        // jump again to condition
-        builder.createBr(conditionBlock);
+        // jump again to condition without break or continue statement
+	if (!builder.getInsertBlock().getTerminator())
+        	builder.createBr(conditionBlock);
 
         builder.setInsertionPoint(next);
     }

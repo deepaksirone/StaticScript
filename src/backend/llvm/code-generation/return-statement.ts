@@ -9,6 +9,8 @@ import {buildFromExpression, buildFromIdentifier, loadIfNeeded} from "../index";
 
 export class ReturnStatementCodeGenerator implements NodeGenerateInterface<ts.ReturnStatement, any> {
     generate(node: ts.ReturnStatement, ctx: Context, builder: llvm.IRBuilder): any {
+	if (builder.getInsertBlock().getTerminator())
+		return;
         if (!node.expression) {
             return builder.createRetVoid();
         }
