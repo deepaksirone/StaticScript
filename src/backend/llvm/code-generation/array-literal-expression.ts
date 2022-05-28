@@ -5,6 +5,7 @@ import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
 import {ArrayReference} from "../value";
 import {NativeType} from "../native-type";
+import {buildFromExpression} from "../index"
 import UnsupportedError from "../../error";
 
 export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterface<ts.ArrayLiteralExpression, ArrayReference> {
@@ -16,18 +17,26 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
             );
         }
 
-        const structType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayStructLLVMType(
+
+        /*const structType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayStructLLVMType(
             nativeType.getType(),
             ctx,
             `array<${nativeType.getType().toString()}>`
-        );
+        );*/
+
+        const arrayType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayLLVMType(nativeType.getType(), node.elements.length, ctx, `array<${nativeType.getType().toString()}>`);
+
+	console.log(`Array native type: ${arrayType.toString()}`);
 
         const allocate = builder.createAlloca(
-            structType
+            arrayType
         );
 
+	// Store each element into the array
+        ArrayLiteralExpressionCodeGenerator.storeIntoArray(node, ctx, builder, allocate);	
+
         return new ArrayReference(
-            structType.getElementType(0),
+            nativeType.getType(),
             allocate
         );
     }
@@ -45,4 +54,21 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
 
         return structType;
     }
+
+    static buildTypedArrayLLVMType(elementType: llvm.Type, numElements: number, ctx: Context, name: string): llvm.ArrayType {
+	const type = llvm.ArrayType.get(elementType, numElements);
+	return type;
+    }
+
+    static storeIntoArray(node: ts.ArrayLiteralExpression, ctx: Context, builder: llvm.IRBuilder, array: llvm.AllocaInst) {
+	for (var i = 0; i < node.elements.length; i++) {
+		const val = buildFromExpression(node.elements[i], ctx, builder);
+		const arrIdx1 = llvm.ConstantInt.get(ctx.llvmContext, i, 64);
+		const arrIdx2 = llvm.ConstantInt.get(ctx.llvmContext, 0, 64);
+		const idxArray : Array<llvm.Value> = [arrIdx1, arrIdx2];
+		const arrayPtr = builder.createInBoundsGEP(array, idxArray);
+		builder.createStore(val.getValue(), arrayPtr);
+	}
+    }
+	
 }

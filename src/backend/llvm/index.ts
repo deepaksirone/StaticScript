@@ -37,6 +37,7 @@ import {PostfixUnaryExpressionCodeGenerator} from "./code-generation/postfix-una
 import {FunctionDeclarationCodeGenerator} from "./code-generation/function-declaration";
 import {TypeOfExpressionCodeGenerator} from "./code-generation/typeof-expression";
 import {PrefixUnaryExpressionCodeGenerator} from "./code-generation/prefix-unary-expression";
+import {ElementAccessExpressionGenerator} from "./code-generation/element-access-expression";
 
 export function emitCondition(
     condition: ts.Expression,
@@ -206,13 +207,15 @@ export function buildCalleFromCallExpression(
     builder: llvm.IRBuilder
 ) {
     const signature = ctx.typeChecker.getResolvedSignature(expr);
+    console.log(`Function signature: ${signature}`);
     if (signature) {
         const callSignature = buildCalleFromSignature(signature, ctx, builder);
         if (callSignature) {
             return callSignature;
         }
     }
-
+    
+    console.log(`The expression in CallExpression: ${ts.SyntaxKind[expr.expression.kind]}`);
     return buildFromExpression(expr.expression, ctx, builder).getValue();
 }
 
@@ -275,6 +278,7 @@ export function buildFromIdentifier(identifier: ts.Identifier, ctx: Context, bui
 
     const fn = ctx.llvmModule.getFunction(<string>identifier.escapedText);
     if (fn) {
+	console.log(`The function reference: ${<string>identifier.escapedText}`);
         return new FunctionReference(fn);
     }
 
@@ -284,6 +288,30 @@ export function buildFromIdentifier(identifier: ts.Identifier, ctx: Context, bui
     );
 }
 
+function buildFromObjectLiteralExpression(block: ts.ObjectLiteralExpression, ctx: Context, 
+					  builder: llvm.IRBuilder, nativeType?: NativeType) {
+	// Creating a map (string -> string) from an object literal expression
+	for (let prop of block.properties) {
+		switch (prop.kind) {
+                    case ts.SyntaxKind.PropertyAssignment:
+                        // Supporting string to string maps
+                        // TODO: More map types
+                        const v : ts.PropertyAssignment = prop as ts.PropertyAssignment;
+                        console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 
+                                name expr text: ${(<ts.StringLiteral>v.name).text},
+                                assgn expr text: ${(<ts.StringLiteral>v.initializer).text}`);
+                        const key = (<ts.StringLiteral>v.name).text;
+                        const value = (<ts.StringLiteral>v.initializer).text;
+                	                                
+
+                        break;  
+                    default:
+                        throw new UnsupportedError(
+                                block,
+                                `Unsupported property: "${ts.SyntaxKind[prop.kind]}"`);
+                }
+        }
+}
 
 export function buildFromExpression(block: ts.Expression, ctx: Context, builder: llvm.IRBuilder, nativeType?: NativeType): Value {
     switch (block.kind) {
@@ -319,37 +347,18 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
             return buildFromExpression((<ts.ParenthesizedExpression>block).expression, ctx, builder);
 	case ts.SyntaxKind.ObjectLiteralExpression:
 	    // Create a map and store it in a variable here
-            // Put the variable in global scope so that it can be retrieved later
-	    const properties = (<ts.ObjectLiteralExpression>block).properties;
-            for (let prop of properties) {
-		switch (prop.kind) {
-	            case ts.SyntaxKind.PropertyAssignment:
-			// Supporting string to string maps
-			// TODO: More map types
-			const v : ts.PropertyAssignment = prop as ts.PropertyAssignment;
-			console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 
-                        	name expr text: ${(<ts.StringLiteral>v.name).text},
-                        	assgn expr text: ${(<ts.StringLiteral>v.initializer).text}`);
-			const key = (<ts.StringLiteral>v.name).text;
-			const value = (<ts.StringLiteral>v.initializer).text;
-						
-
-			break;	
-	 	    default:
-		    	throw new UnsupportedError(
-	    			block,
-				`Unsupported property: "${ts.SyntaxKind[prop.kind]}"`);
-		}
-            }
-	    break;
+	    buildFromObjectLiteralExpression(<ts.ObjectLiteralExpression>block, ctx, builder);
+	    return null
+	case ts.SyntaxKind.ElementAccessExpression:
+	    return new ElementAccessExpressionGenerator().generate(block as ts.ElementAccessExpression, ctx, builder);
         default:
 	    console.trace();
 	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);
             //const v = (<ts.ObjectLiteralExpression<ts.ObjectLiteralElementLike>>block).properties[5].name;
-	    const v : ts.PropertyAssignment = (<ts.ObjectLiteralExpression>block).properties[5] as ts.PropertyAssignment;
-            console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 
-			name expr text: ${(<ts.StringLiteral>v.name).text},
-			assgn expr text: ${(<ts.StringLiteral>v.initializer).text}`);
+	    //const v : ts.PropertyAssignment = (<ts.ObjectLiteralExpression>block).properties[5] as ts.PropertyAssignment;
+            //console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 
+		//	name expr text: ${(<ts.StringLiteral>v.name).text},
+		//	assgn expr text: ${(<ts.StringLiteral>v.initializer).text}`);
 	    
             throw new UnsupportedError(
                 block,
@@ -358,8 +367,86 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
     }
 }
 
+function generateAssignment(block: ts.VariableDeclaration, rhs: Value, ctx: Context, builder: llvm.IRBuilder) : llvm.Value {
+	var value: llvm.Value;
+	switch (rhs.getType()) {
+		case ValueTypeEnum.STRING:
+			const pointerTy = rhs.getValue().type;
+			if (pointerTy.toString() === "i8*") {
+				// Allocate first time
+				console.log("Allocating string for the first time");
+				value = builder.createAlloca(
+                			pointerTy,
+                			undefined,
+                			<string>(<ts.Identifier>(block.name)).escapedText
+            			);
+
+            			builder.createStore(
+                			rhs.getValue(),
+                			value,
+                			false
+            			);
+
+				return value;
+			} else {
+				// Propagate new variables
+				const rhsVar = builder.createLoad(rhs.getValue());
+				value = builder.createAlloca(
+                                        llvm.Type.getInt8PtrTy(ctx.llvmContext),
+                                        undefined,
+                                        <string>(<ts.Identifier>(block.name)).escapedText
+                                );
+
+				builder.createStore(
+                                        rhsVar,
+                                        value,
+                                        false
+                                );
+                                return value;
+			}
+
+			break;
+		case ValueTypeEnum.DOUBLE:
+			value = builder.createAlloca(
+                                        rhs.getValue().type,
+                                        undefined,
+                                        <string>(<ts.Identifier>(block.name)).escapedText
+                        );
+
+                        builder.createStore(
+                                        rhs.getValue(),
+                                        value,
+                                        false
+                        );
+
+                        return value;
+			break;
+
+		default:
+			// regular load and store
+			const rhsVar = builder.createLoad(rhs.getValue());
+			value = builder.createAlloca(
+                                        rhsVar.type,
+                                        undefined,
+                                        <string>(<ts.Identifier>(block.name)).escapedText
+                        );
+
+			builder.createStore(
+                                        rhsVar,
+                                        value,
+                                        false
+                        );
+                        return value;
+			break;			
+	}
+
+	return null
+}	
+
 export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Context, builder: llvm.IRBuilder) {
     if (block.initializer && block.name.kind == ts.SyntaxKind.Identifier) {
+	const typ = ctx.typeChecker.getTypeFromTypeNode(block.type);
+	console.log(`var name: ${<string>block.name.escapedText}, type: ${ts.TypeFlags[typ.flags]}, isString: ${typ.isStringLiteral()}, insname: ${(<any>typ).intrinsicName}`);
         const nativeTypeForDefaultValue = NativeTypeResolver.getType(
             ctx.typeChecker.getTypeFromTypeNode(block.type),
             ctx
@@ -367,7 +454,8 @@ export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Cont
 
         const defaultValue = buildFromExpression(block.initializer, ctx, builder, nativeTypeForDefaultValue);
         if (defaultValue instanceof Primitive) {
-            const value = builder.createAlloca(
+	    console.log(`Type of alloca var: ${defaultValue.getValue().type.toString()}`);
+            /*const value = builder.createAlloca(
                 defaultValue.getValue().type,
                 undefined,
                 <string>block.name.escapedText
@@ -377,7 +465,9 @@ export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Cont
                 defaultValue.getValue(),
                 value,
                 false
-            );
+            );*/
+	    
+	    const value = generateAssignment(block, defaultValue, ctx, builder);
 
             ctx.scope.variables.set(<string>block.name.escapedText, new Primitive(value, defaultValue.getType()));
         } else {
@@ -467,7 +557,8 @@ export function passStatement(stmt: ts.Statement, ctx: Context, builder: llvm.IR
 }
 
 export function loadIfNeeded(value: Value, builder: llvm.IRBuilder): llvm.Value {
-    if (value.getValue().type.isPointerTy() && !value.isString()) {
+    // Hacky Styff: global string is of type i8, other string pointer values are i8**
+    if (value.getValue().type.isPointerTy() && !(value.getValue().type.toString() === "i8*")) {
         return builder.createLoad(value.getValue());
     }
 
