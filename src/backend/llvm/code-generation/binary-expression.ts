@@ -234,6 +234,20 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                     ValueTypeEnum.BOOLEAN
                 );
             }
+	    // Logical Or
+	    case ts.SyntaxKind.BarBarToken: {
+	    	const left = buildFromExpression(node.left, ctx, builder);
+		const right = buildFromExpression(node.right, ctx, builder);
+
+		return new Primitive(
+		    builder.createOr(
+			loadIfNeeded(left, builder), 
+			loadIfNeeded(right, builder), 
+			"or"
+		    ),
+		    ValueTypeEnum.BOOLEAN
+		);
+	    }
             default:
                 throw new UnsupportedError(
                     node,
