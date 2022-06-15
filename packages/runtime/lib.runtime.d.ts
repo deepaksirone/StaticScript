@@ -20,6 +20,14 @@ declare class Math {
     static abs(value: number): number;
 }
 
+declare class Time {
+	hour(): number;
+}
+
+declare class Meta {
+       currentUserTime: Time;
+}
+
 interface Array<T = any> {
     // push(member: number): number;
 }

@@ -548,6 +548,8 @@ export function passStatement(stmt: ts.Statement, ctx: Context, builder: llvm.IR
         case ts.SyntaxKind.PostfixUnaryExpression:
             new PostfixUnaryExpressionCodeGenerator().generate(<any>stmt, ctx, builder);
             break;
+	case ts.SyntaxKind.EndOfFileToken:
+	    break;
         default:
             throw new UnsupportedError(
                 stmt,
@@ -593,6 +595,10 @@ export function initializeLLVM() {
     llvm.initializeAllAsmPrinters();
 }
 
+function addEntryShimCalls(ctx: Context, builder: llvm.IRBuilder) {
+    
+}
+
 export function generateModuleFromProgram(program: ts.Program): llvm.Module {
     const ctx = new Context(
         program.getTypeChecker()
@@ -608,6 +614,9 @@ export function generateModuleFromProgram(program: ts.Program): llvm.Module {
         llvmFunction: mainFn,
         declaration: null
     };
+
+    // Adding entry shims for the program
+    addEntryShimCalls(ctx, builder);
 
     for (const sourceFile of program.getSourceFiles()) {
         if (!sourceFile.isDeclarationFile) {

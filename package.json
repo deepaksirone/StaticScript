@@ -25,7 +25,7 @@
     "commander": "^2.19.0"
   },
   "dependencies": {
-    "@static-script/runtime": "^0.11.0",
+    "@static-script/runtime": "git+ssh://git@github.com:deepaksirone/static_script_runtime.git",
     "llvm-node": "github:MichaReiser/llvm-node#bb1de20f1776c5f3cb9293dd3ef984e698ad2274",
     "typescript": "3.6.3"
   }
