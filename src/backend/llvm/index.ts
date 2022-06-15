@@ -579,6 +579,9 @@ export function passNode(node: ts.Node, ctx: Context, builder: llvm.IRBuilder) {
 	case ts.SyntaxKind.IfStatement:
 	    passStatement(<any>node, ctx, builder);
             break;
+	default:
+	    console.log(`[Unparsed] Type of Statement: ${ts.SyntaxKind[node.kind]}`);		
+	    passStatement(<any>node, ctx, builder);
     }
 }
 
