@@ -4,7 +4,7 @@
 
 "@static-script/runtime@git+ssh://git@github.com:deepaksirone/static_script_runtime.git":
   version "0.11.0"
-  resolved "git+ssh://git@github.com:deepaksirone/static_script_runtime.git#d205f301d6e14f180782f77c5eabab871cb0a3e8"
+  resolved "git+ssh://git@github.com:deepaksirone/static_script_runtime.git#c1338e824bae479e603ac1e46c9f46019d5d0a5c"
 
 "@types/node@12.7.11":
   version "12.7.11"

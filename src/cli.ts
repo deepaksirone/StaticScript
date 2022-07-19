@@ -16,6 +16,7 @@ interface CommandLineArguments {
     args: string[];
     debug: boolean;
     printIR: boolean;
+    riscv: boolean;
     outputFile: string;
     optimizationLevel: string;
 }
@@ -24,6 +25,7 @@ function parseCommandLine(): CommandLineArguments {
     cli
         .version('next')
         .option('--debug', 'Show all debug information', false)
+	.option('--riscv', 'Compile for RISCV target', false)
         .option('-ir, --printIR', 'Print IR', false)
         .option('-f, --outputFile <n>', 'Name of the executable file', 'main')
         .option('-o, --optimizationLevel <n>', 'Optimization level', 3)
@@ -97,17 +99,33 @@ try {
     }
 
     {
-        const output = executeLLCSync([
-            optimizationLevel,
-            // Fully relocatable, position independent code
-            '-relocation-model=pic',
-            '-filetype=obj', path.join(outputPath, 'main.bc'),
-            '-o', path.join(outputPath, 'main.o'),
-        ]);
+	let target_opts: string = "";
+	var output;
+	if (cliOptions.riscv) {
+		//target_opts = " -march=riscv64 -mcpu=sifive-u54 -target-abi=lp64d "
+        	output = executeLLCSync([
+            		optimizationLevel,
+            		// Fully relocatable, position independent code
+            		'-relocation-model=pic',
+            		'-filetype=obj', '-march=riscv64', '-mcpu=sifive-u54', '-target-abi=lp64d',
+			path.join(outputPath, 'main.bc'),
+            		'-o', path.join(outputPath, 'main.o'),
+        	]);
+       } else {
+	       output = executeLLCSync([
+                        optimizationLevel,
+                        // Fully relocatable, position independent code
+                        '-relocation-model=pic',
+                        '-filetype=obj',
+                        path.join(outputPath, 'main.bc'),
+                        '-o', path.join(outputPath, 'main.o'),
+                ]);
+       }
 
-        if (cliOptions.debug) {
-            ts.sys.write(output.toString());
-        }
+       if (cliOptions.debug) {
+	    ts.sys.write(output.toString());
+       }
+
     }
 
     if (cliOptions.debug) {
@@ -115,17 +133,26 @@ try {
     }
 
     {
-        const output = execFileSync("c++", [
-            optimizationLevel,
-            path.join(outputPath, 'main.o'),
-            RUNTIME_ARCHIVE_FILE,
-            '-o', path.join(outputPath, cliOptions.outputFile),
-            '-lstdc++',
-            '-std=c++11',
-            '-Werror',
-            '-pthread',
-            '-v',
-        ]);
+	let compiler: string = "c++";
+	let opts: string = ' -lstdc++ -std=c++11 -Werror -pthread -v ';
+	var output;
+	if (cliOptions.riscv) {
+		//compiler = "riscv64-unknown-linux-musl-g++";
+		//opts = " -lstdc++ -std=c++11 -static -march=rv64imafdc -mabi=lp64d -Werror -pthread ";
+		output = execFileSync('riscv64-unknown-linux-musl-g++', [
+            			optimizationLevel,
+            			path.join(outputPath, 'main.o'),
+            			RUNTIME_ARCHIVE_FILE, '-lstdc++', '-std=c++11', '-static', '-march=rv64imafdc', '-mabi=lp64d', '-Werror', '-pthread',
+            			'-o', path.join(outputPath, cliOptions.outputFile),
+        	]);
+	} else {
+		output = execFileSync('c++', [
+                                optimizationLevel,
+                                path.join(outputPath, 'main.o'),
+                                RUNTIME_ARCHIVE_FILE, '-lstdc++', '-std=c++11', '-Werror', '-pthread', '-v',
+                                '-o', path.join(outputPath, cliOptions.outputFile),
+                ]);
+	}
 
         if (cliOptions.debug) {
             ts.sys.write(output.toString());

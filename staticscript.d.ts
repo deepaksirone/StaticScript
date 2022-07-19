@@ -31,3 +31,11 @@ interface String {}
 
 declare function puts(str: string): void;
 
+declare class Action {
+	skip(): void;
+}
+
+declare class Smartthings {
+	static turnOnSmartthings: Action;
+}
+

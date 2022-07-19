@@ -208,6 +208,35 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                     ValueTypeEnum.BOOLEAN
                 );
             }
+	    case ts.SyntaxKind.GreaterThanEqualsToken: {
+		const left = buildFromExpression(node.left, ctx, builder);
+                const right = buildFromExpression(node.right, ctx, builder);
+
+		const gt = new Primitive(
+                    builder.createFCmpOGT(
+                        loadIfNeeded(left, builder),
+                        loadIfNeeded(right, builder),
+                        'cmpGT'
+                    ),
+                    ValueTypeEnum.BOOLEAN
+                );
+
+		const eq = new Primitive(
+                    builder.createFCmpOEQ(
+                        loadIfNeeded(left, builder),
+                        loadIfNeeded(right, builder)
+                    )
+                );
+
+		return new Primitive(
+                    builder.createOr(
+                        loadIfNeeded(gt, builder),
+                        loadIfNeeded(eq, builder),
+                        "or"
+                    ),
+                    ValueTypeEnum.BOOLEAN
+                );
+	    }
             case ts.SyntaxKind.LessThanToken: {
                 const left = buildFromExpression(node.left, ctx, builder);
                 const right = buildFromExpression(node.right, ctx, builder);
