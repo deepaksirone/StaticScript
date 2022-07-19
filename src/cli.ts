@@ -142,7 +142,7 @@ try {
 		output = execFileSync('riscv64-unknown-linux-musl-g++', [
             			optimizationLevel,
             			path.join(outputPath, 'main.o'),
-            			RUNTIME_ARCHIVE_FILE, '-lstdc++', '-std=c++11', '-static', '-march=rv64imafdc', '-mabi=lp64d', '-Werror', '-pthread',
+            			RUNTIME_ARCHIVE_FILE, '-lstdc++', '-std=c++11', '-static', '-march=rv64imafdc', '-mabi=lp64d', '-Werror', '-pthread', '-v',
             			'-o', path.join(outputPath, cliOptions.outputFile),
         	]);
 	} else {
