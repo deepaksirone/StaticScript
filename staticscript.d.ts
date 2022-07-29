@@ -35,7 +35,15 @@ declare class Action {
 	skip(): void;
 }
 
+declare class TriggerData {
+	ConditionImageURL: string;
+}
+
 declare class Smartthings {
 	static turnOnSmartthings: Action;
+}
+
+declare class Weather {
+	static tomorrowsForecastCallsFor: TriggerData;
 }
 

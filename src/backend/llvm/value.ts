@@ -23,6 +23,15 @@ export function convertLLVMTypeToValueType(type: llvm.Type) {
     switch (type.typeID) {
         case llvm.Type.TypeID.DoubleTyID:
             return ValueTypeEnum.DOUBLE;
+	case llvm.Type.TypeID.PointerTyID: {
+	    console.log("[convertLLVMTypeToValueType] Returning string type");
+	    return ValueTypeEnum.STRING;
+	}
+	case llvm.Type.TypeID.FunctionTyID: {
+	    const fnType = type as llvm.FunctionType;
+	    console.log("[convertLLVMTypeToValueType] Converting function type");
+	    return convertLLVMTypeToValueType(fnType.returnType);
+	}
         default:
             return ValueTypeEnum.UNKNOWN;
     }

@@ -266,6 +266,7 @@ function declareFunctionFromDefinition(
 }
 
 export function buildFromIdentifier(identifier: ts.Identifier, ctx: Context, builder: llvm.IRBuilder): Value {
+    console.trace(); 
     const variable = ctx.scope.variables.get(<string>identifier.escapedText);
     if (variable) {
         return variable;
@@ -615,7 +616,6 @@ export function generateModuleFromProgram(program: ts.Program): llvm.Module {
         declaration: null
     };
 
-    // Adding entry shims for the program
     addEntryShimCalls(ctx, builder);
 
     for (const sourceFile of program.getSourceFiles()) {
