@@ -19,6 +19,7 @@ interface CommandLineArguments {
     riscv: boolean;
     outputFile: string;
     optimizationLevel: string;
+    outputBinary: boolean;
 }
 
 function parseCommandLine(): CommandLineArguments {
@@ -29,6 +30,7 @@ function parseCommandLine(): CommandLineArguments {
         .option('-ir, --printIR', 'Print IR', false)
         .option('-f, --outputFile <n>', 'Name of the executable file', 'main')
         .option('-o, --optimizationLevel <n>', 'Optimization level', 3)
+	.option('--outputBinary', 'Output an executable', false) 
         .parse(process.argv);
 
     return cli as any as CommandLineArguments;
@@ -60,7 +62,12 @@ if (diagnostics.length) {
 initializeLLVM();
 
 try {
-    const llvmModule = generateModuleFromProgram(program);
+    var llvmModule;
+    if (cliOptions.outputBinary) {
+        llvmModule = generateModuleFromProgram(program, "main");
+    } else {
+	llvmModule = generateModuleFromProgram(program, "__rule_function");
+    }
 
     llvm.verifyModule(llvmModule);
 
@@ -107,7 +114,7 @@ try {
             		optimizationLevel,
             		// Fully relocatable, position independent code
             		'-relocation-model=pic',
-            		'-filetype=obj', '-march=riscv64', '-mcpu=sifive-u54', '-target-abi=lp64d',
+            		'-filetype=obj', '-march=riscv64', '-mcpu=sifive-u74', '-target-abi=lp64d',
 			path.join(outputPath, 'main.bc'),
             		'-o', path.join(outputPath, 'main.o'),
         	]);
@@ -127,36 +134,38 @@ try {
        }
 
     }
+    
+    if (cliOptions.outputBinary) {
+    	if (cliOptions.debug) {
+        	ts.sys.write('Executing c++ compiler');
+    	}
 
-    if (cliOptions.debug) {
-        ts.sys.write('Executing c++ compiler');
-    }
-
-    {
-	let compiler: string = "c++";
-	let opts: string = ' -lstdc++ -std=c++11 -Werror -pthread -v ';
-	var output;
-	if (cliOptions.riscv) {
-		//compiler = "riscv64-unknown-linux-musl-g++";
-		//opts = " -lstdc++ -std=c++11 -static -march=rv64imafdc -mabi=lp64d -Werror -pthread ";
-		output = execFileSync('riscv64-unknown-linux-musl-g++', [
+    	{
+		let compiler: string = "c++";
+		let opts: string = ' -lstdc++ -std=c++11 -Werror -pthread -v ';
+		var output;
+		if (cliOptions.riscv) {
+			//compiler = "riscv64-unknown-linux-musl-g++";
+			//opts = " -lstdc++ -std=c++11 -static -march=rv64imafdc -mabi=lp64d -Werror -pthread ";
+			output = execFileSync('riscv64-unknown-linux-musl-g++', [
             			optimizationLevel,
             			path.join(outputPath, 'main.o'),
             			RUNTIME_ARCHIVE_FILE, '-lstdc++', '-std=c++11', '-static', '-march=rv64imafdc', '-mabi=lp64d', '-Werror', '-pthread', '-v',
             			'-o', path.join(outputPath, cliOptions.outputFile),
-        	]);
-	} else {
-		output = execFileSync('c++', [
-                                optimizationLevel,
-                                path.join(outputPath, 'main.o'),
-                                RUNTIME_ARCHIVE_FILE, '-lstdc++', '-std=c++11', '-Werror', '-pthread', '-v',
-                                '-o', path.join(outputPath, cliOptions.outputFile),
-                ]);
-	}
+        		]);
+		} else {
+			output = execFileSync('c++', [
+                               		optimizationLevel,
+                                	path.join(outputPath, 'main.o'),
+                                	RUNTIME_ARCHIVE_FILE, '-lstdc++', '-std=c++11', '-Werror', '-pthread', '-v',
+                                	'-o', path.join(outputPath, cliOptions.outputFile),
+                	]);
+		}
 
-        if (cliOptions.debug) {
-            ts.sys.write(output.toString());
-        }
+        	if (cliOptions.debug) {
+            		ts.sys.write(output.toString());
+        	}
+    	}
     }
 } catch (e) {
     if (e instanceof UnsupportedError) {

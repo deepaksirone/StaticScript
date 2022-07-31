@@ -159,7 +159,8 @@ function mangleNameFromDeclaration(
 export function buildCalleFromSignature(
     signature: ts.Signature,
     ctx: Context,
-    builder: llvm.IRBuilder
+    builder: llvm.IRBuilder,
+    fnName?: string
 ): llvm.Function|null {
     if (ctx.signature.has(signature)) {
         return ctx.signature.get(signature);
@@ -170,30 +171,58 @@ export function buildCalleFromSignature(
         const sourceFile = declaration.getSourceFile();
 
         if (sourceFile.fileName === RUNTIME_DEFINITION_FILE) {
-            const llvmFunction = declareFunctionFromDefinition(
-                <ts.FunctionDeclaration>declaration,
-                ctx,
-                builder,
-                mangleNameFromDeclaration(declaration, ctx, CPPMangler)
-            );
+	    var llvmFunction;
+	    if (fnName) {
+               llvmFunction = declareFunctionFromDefinition(
+                    <ts.FunctionDeclaration>declaration,
+                    ctx,
+                    builder,
+                    fnName
+               );
 
-            ctx.signature.set(signature, llvmFunction);
+               ctx.signature.set(signature, llvmFunction);
 
-            return llvmFunction;
+               return llvmFunction;
+	    } else {
+	       llvmFunction = declareFunctionFromDefinition(
+                    <ts.FunctionDeclaration>declaration,
+                    ctx,
+                    builder,
+                    mangleNameFromDeclaration(declaration, ctx, CPPMangler)
+               );
+
+               ctx.signature.set(signature, llvmFunction);
+
+               return llvmFunction;
+	   }
         }
 
         if (sourceFile.fileName === LANGUAGE_DEFINITION_FILE) {
-            const llvmFunction = declareFunctionFromDefinition(
-                <ts.FunctionDeclaration>declaration,
-                ctx,
-                builder,
-                mangleNameFromDeclaration(declaration, ctx, CMangler)
-            );
+            var llvmFunction;
+            if (fnName) {
+               llvmFunction = declareFunctionFromDefinition(
+                    <ts.FunctionDeclaration>declaration,
+                    ctx,
+                    builder,
+                    fnName
+               );
 
+               ctx.signature.set(signature, llvmFunction);
 
-            ctx.signature.set(signature, llvmFunction);
+               return llvmFunction;
+            } else {
+               llvmFunction = declareFunctionFromDefinition(
+                    <ts.FunctionDeclaration>declaration,
+                    ctx,
+                    builder,
+                    mangleNameFromDeclaration(declaration, ctx, CMangler)
+               );
 
-            return llvmFunction;
+               ctx.signature.set(signature, llvmFunction);
+
+               return llvmFunction;
+           }
+
         }
     }
 
@@ -204,12 +233,13 @@ export function buildCalleFromSignature(
 export function buildCalleFromCallExpression(
     expr: ts.CallExpression,
     ctx: Context,
-    builder: llvm.IRBuilder
+    builder: llvm.IRBuilder,
+    fnName?: string
 ) {
     const signature = ctx.typeChecker.getResolvedSignature(expr);
-    console.log(`Function signature: ${signature}`);
+    console.log(`Function signature: ${ctx.typeChecker.signatureToString(signature)}`);
     if (signature) {
-        const callSignature = buildCalleFromSignature(signature, ctx, builder);
+        const callSignature = buildCalleFromSignature(signature, ctx, builder, fnName);
         if (callSignature) {
             return callSignature;
         }
@@ -600,13 +630,13 @@ function addEntryShimCalls(ctx: Context, builder: llvm.IRBuilder) {
     
 }
 
-export function generateModuleFromProgram(program: ts.Program): llvm.Module {
+export function generateModuleFromProgram(program: ts.Program, mainfnName: string): llvm.Module {
     const ctx = new Context(
         program.getTypeChecker()
     );
 
     const mainFnType = llvm.FunctionType.get(llvm.Type.getInt64Ty(ctx.llvmContext), false);
-    const mainFn = llvm.Function.create(mainFnType, llvm.LinkageTypes.ExternalLinkage, "main", ctx.llvmModule);
+    const mainFn = llvm.Function.create(mainFnType, llvm.LinkageTypes.ExternalLinkage, mainfnName, ctx.llvmModule);
 
     const block = llvm.BasicBlock.create(ctx.llvmContext, "entry", mainFn);
     const builder = new llvm.IRBuilder(block);
