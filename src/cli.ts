@@ -10,7 +10,7 @@ import DiagnosticHostInstance from "./diagnostic.host";
 import UnsupportedError from "./backend/error/unsupported.error";
 import {existsSync, mkdirSync} from "fs";
 import {execFileSync} from "child_process";
-import {executeLLCSync, executeOptSync} from "./utils";
+import {executeLLCSync, executeOptSync, executeSedSync, executeLLVMDisSync} from "./utils";
 
 interface CommandLineArguments {
     args: string[];
@@ -110,12 +110,17 @@ try {
 	var output;
 	if (cliOptions.riscv) {
 		//target_opts = " -march=riscv64 -mcpu=sifive-u54 -target-abi=lp64d "
+		const llvm_dis = executeLLVMDisSync([path.join(outputPath, 'main.bc'), '-o', path.join(outputPath, 'main.ll')]);
+		const sed_output = executeSedSync(['-i', 
+						  "/define i64 @__rule_function() local_unnamed_addr {/c\define i64 @__rule_function() local_unnamed_addr section \".secure_code\" {",
+						  path.join(outputPath, 'main.ll')]);
+
         	output = executeLLCSync([
             		optimizationLevel,
             		// Fully relocatable, position independent code
             		'-relocation-model=pic',
             		'-filetype=obj', '-march=riscv64', '-mcpu=sifive-u74', '-target-abi=lp64d',
-			path.join(outputPath, 'main.bc'),
+			path.join(outputPath, 'main.ll'),
             		'-o', path.join(outputPath, 'main.o'),
         	]);
        } else {

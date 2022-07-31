@@ -25,3 +25,17 @@ export function executeOptSync(options: Array<any>): Buffer|string {
         options
     )
 }
+
+export function executeSedSync(options: Array<any>): Buffer|string {
+	return child_process.execFileSync(
+		'sed',
+		options
+	)
+}
+
+export function executeLLVMDisSync(options: Array<any>): Buffer|string {
+	return child_process.execFileSync(
+		path.join(getLLVMBinDirectory(), 'llvm-dis'),
+		options
+	)
+}
