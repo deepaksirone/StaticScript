@@ -114,6 +114,9 @@ try {
 		const sed_output = executeSedSync(['-i', 
 						  "/define i64 @__rule_function() local_unnamed_addr {/c\define i64 @__rule_function() local_unnamed_addr section \".secure_code\" {",
 						  path.join(outputPath, 'main.ll')]);
+		const sed_op_secure_data = executeSedSync(['-i', '-E',
+							  "s/(.* private unnamed_addr constant)(.*)(, align .*)/\\1\\2, section \".secure_data\"\\3/",
+							  path.join(outputPath, 'main.ll')]);
 
         	output = executeLLCSync([
             		optimizationLevel,
