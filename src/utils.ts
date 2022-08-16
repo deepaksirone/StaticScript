@@ -39,3 +39,11 @@ export function executeLLVMDisSync(options: Array<any>): Buffer|string {
 		options
 	)
 }
+
+export function executeARSync(options: Array<any>): Buffer|string {
+        return child_process.execFileSync(
+                'ar',
+                options
+        )
+}
+

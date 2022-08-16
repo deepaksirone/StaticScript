@@ -10,7 +10,7 @@ import DiagnosticHostInstance from "./diagnostic.host";
 import UnsupportedError from "./backend/error/unsupported.error";
 import {existsSync, mkdirSync} from "fs";
 import {execFileSync} from "child_process";
-import {executeLLCSync, executeOptSync, executeSedSync, executeLLVMDisSync} from "./utils";
+import {executeLLCSync, executeOptSync, executeSedSync, executeLLVMDisSync, executeARSync} from "./utils";
 
 interface CommandLineArguments {
     args: string[];
@@ -136,6 +136,8 @@ try {
                         '-o', path.join(outputPath, 'main.o'),
                 ]);
        }
+       
+       output = executeARSync(['rcs', path.join(outputPath, 'rule_lib.a'), path.join(outputPath, 'main.o')]);
 
        if (cliOptions.debug) {
 	    ts.sys.write(output.toString());
