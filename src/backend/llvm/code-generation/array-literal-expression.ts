@@ -37,7 +37,8 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
 
         return new ArrayReference(
             nativeType.getType(),
-            allocate
+            allocate,
+	    node.elements.length
         );
     }
 

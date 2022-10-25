@@ -29,6 +29,10 @@ interface RegExp {}
 
 interface String {}
 
+interface Array {
+	length: number;
+}
+
 declare function puts(str: string): void;
 
 declare class Action {

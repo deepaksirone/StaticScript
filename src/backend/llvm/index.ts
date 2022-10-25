@@ -296,7 +296,7 @@ function declareFunctionFromDefinition(
 }
 
 export function buildFromIdentifier(identifier: ts.Identifier, ctx: Context, builder: llvm.IRBuilder): Value {
-    console.trace(); 
+    //console.trace(); 
     const variable = ctx.scope.variables.get(<string>identifier.escapedText);
     if (variable) {
         return variable;
@@ -349,6 +349,7 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
         case ts.SyntaxKind.NewExpression:
             return new NewExpressionGenerator().generate(<any>block, ctx, builder);
         case ts.SyntaxKind.PropertyAccessExpression:
+	    console.log("Generating code for PropertyAccessExpression");	
             return new PropertyAccessExpressionCodeGenerator().generate(<any>block, ctx, builder);
         case ts.SyntaxKind.Identifier:
             return buildFromIdentifier(<any>block, ctx, builder);
@@ -383,7 +384,7 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
 	case ts.SyntaxKind.ElementAccessExpression:
 	    return new ElementAccessExpressionGenerator().generate(block as ts.ElementAccessExpression, ctx, builder);
         default:
-	    console.trace();
+	    //console.trace();
 	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);
             //const v = (<ts.ObjectLiteralExpression<ts.ObjectLiteralElementLike>>block).properties[5].name;
 	    //const v : ts.PropertyAssignment = (<ts.ObjectLiteralExpression>block).properties[5] as ts.PropertyAssignment;

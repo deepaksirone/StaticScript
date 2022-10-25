@@ -72,10 +72,12 @@ export class FunctionReference implements Value {
 export class ArrayReference implements Value {
     public elementType: llvm.Type;
     public llvmValue: llvm.AllocaInst;
+    public numElements: number;
 
-    constructor(elementType: llvm.Type, llvmValue: llvm.AllocaInst) {
+    constructor(elementType: llvm.Type, llvmValue: llvm.AllocaInst, numElements: number) {
         this.elementType = elementType;
         this.llvmValue = llvmValue;
+	this.numElements = numElements;
     }
 
     getValue(): llvm.AllocaInst {
@@ -92,6 +94,10 @@ export class ArrayReference implements Value {
 
     public isString(): boolean {
         return false;
+    }
+
+    public getNumElements(): number {
+	return this.numElements;
     }
 }
 

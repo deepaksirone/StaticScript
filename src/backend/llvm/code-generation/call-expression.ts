@@ -26,7 +26,7 @@ function getFullnameFromCallExpression(node: ts.Expression): string {
 
 export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.CallExpression, Value> {
     generate(node: ts.CallExpression, ctx: Context, builder: llvm.IRBuilder, nativeType?: NativeType): Value {
-	console.trace();
+	//console.trace();
 	//Hacky way to handle Action API and skip functions
 	const signature = ctx.typeChecker.getResolvedSignature(node);
 	var callle = null;

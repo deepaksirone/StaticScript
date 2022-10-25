@@ -4,7 +4,7 @@ import * as llvm from 'llvm-node';
 import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
 import {NativeType} from "../native-type";
-import {Primitive, Value, convertLLVMTypeToValueType} from "../value";
+import {Primitive, ArrayReference, Value, ValueTypeEnum, convertLLVMTypeToValueType} from "../value";
 import UnsupportedError from "../../error";
 import {IsRuleIngredient} from "./rule-ingredient"
 import {buildFromExpression} from "../index";
@@ -22,6 +22,17 @@ function getFullnameFromProperty(node: ts.Expression): string {
 
 	return '';
 }
+
+function isJSProperty(node: ts.PropertyAccessExpression): boolean {
+	switch (<string>(<ts.PropertyAccessExpression>node).name.escapedText) {
+		case "length":
+			return true;
+		default:
+			return false;
+	}
+}
+
+
 
 export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterface<ts.PropertyAccessExpression, Value> {
     generate(node: ts.PropertyAccessExpression, ctx: Context, builder: llvm.IRBuilder, nativeType?: NativeType): Value {
@@ -51,6 +62,18 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
                         	[],
                       	   ), valEnum 
        			);
+	} else if (isJSProperty(node)) {
+		let propertyName = <string>(<ts.PropertyAccessExpression>node).name.escapedText;
+		switch (propertyName) {
+			case "length":
+				const arr_ref: ArrayReference = <ArrayReference>ctx.scope.variables.get(<string>(<ts.Identifier>node.expression).escapedText);
+				return new Primitive(
+            				llvm.ConstantFP.get(ctx.llvmContext, arr_ref.getNumElements()),
+            				ValueTypeEnum.DOUBLE
+        			);
+			default:
+
+		}
 	}
         const object = buildFromExpression(node.expression, ctx, builder);
         if (object) {
