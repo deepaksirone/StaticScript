@@ -2,8 +2,8 @@ import * as ts from "typescript";
 import * as llvm from 'llvm-node';
 
 
-let IngredientNames: Array<string> = ["Weather_tomorrowsForecastCallsFor_ConditionImageURL"];
-let IngredientTypes: Array<string> = ["string"];
+let IngredientNames: Array<string> = ["Weather_tomorrowsForecastCallsFor_ConditionImageURL", "AndroidPhone_placeAPhoneCall_CallLength", "AndroidPhone_placeAPhoneCall_OccurredAt"];
+let IngredientTypes: Array<string> = ["string", "string", "string"];
 
 export function IsRuleIngredient(candidate: string, ctx: llvm.LLVMContext): [boolean, llvm.Type] {
 	let idx = IngredientNames.indexOf(candidate);

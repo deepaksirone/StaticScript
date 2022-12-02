@@ -21,7 +21,9 @@ interface Function {}
 
 interface IArguments {}
 
-interface Number {}
+interface Number {
+	toString()
+}
 
 interface Object {}
 
@@ -35,9 +37,19 @@ interface Array {
 
 declare function puts(str: string): void;
 
+declare function parseInt(str: string): number;
+
 declare class Action {
 	skip(): void;
 }
+
+declare class MomentJS {
+	add(rhs: MomentJS);
+	add(n: number, s: string);
+	toString(): string;
+}
+declare function moment(): MomentJS;
+declare function moment(s: string, format: string): MomentJS;
 
 declare class TriggerData {
 	ConditionImageURL: string;
@@ -51,3 +63,19 @@ declare class Weather {
 	static tomorrowsForecastCallsFor: TriggerData;
 }
 
+declare class placeAPhoneCallObj {
+	OccurredAt: string;
+	CallLength: string;
+}
+
+declare class AndroidPhone {
+	static placeAPhoneCall: placeAPhoneCallObj;
+}
+
+declare class addDetailedEventObj {
+	setEndTime(endtime: string);
+}
+
+declare class GoogleCalendar {
+	static addDetailedEvent: addDetailedEventObj;
+}

@@ -33,6 +33,9 @@ export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.Cal
 	if (signature) {
 		switch ((<ts.SignatureDeclaration>signature.declaration).kind) {
 			case ts.SyntaxKind.MethodDeclaration: {
+				
+				
+
 				let fullName = getFullnameFromCallExpression(node);
 				console.log(`The full name: ${fullName}`);
 				callle = buildCalleFromCallExpression(node, ctx, builder, fullName);
