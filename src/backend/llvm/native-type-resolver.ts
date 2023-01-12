@@ -3,6 +3,7 @@ import * as ts from 'typescript';
 import * as llvm from 'llvm-node';
 import {Context} from "./context";
 import {NativeType} from "./native-type";
+import {isJSRuntimeType, generate_runtime_struct_type} from "./code-generation/api/generate-llvm-type"
 
 export class NativeTypeResolver {
     static getType(type: ts.Type, ctx: Context): NativeType|null {
@@ -20,6 +21,12 @@ export class NativeTypeResolver {
         if (type.symbol && <string>type.symbol.escapedName === 'Array' && (<ts.GenericType>type).typeArguments) {
             const genericType = type as ts.GenericType;
             return NativeTypeResolver.getType(genericType.typeArguments[0], ctx);
+        }
+        
+        if (type.symbol) {
+            if (isJSRuntimeType(<string>type.symbol.escapedName)) {
+                return new NativeType(generate_runtime_struct_type(<string>type.symbol.escapedName, ctx));
+            }
         }
 
         if (type.isStringLiteral() || (<any>type).intrinsicName === 'string') {

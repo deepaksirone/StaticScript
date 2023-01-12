@@ -8,6 +8,10 @@ export class SignatureToFunctionTable extends Map<ts.Signature, llvm.Function> {
 
 }
 
+export class APIFunctionToFunctionTable extends Map<string, llvm.Function> {
+
+}
+
 export class Context {
     public typeChecker: ts.TypeChecker;
 
@@ -15,6 +19,8 @@ export class Context {
     public llvmModule: llvm.Module;
 
     public signature: SignatureToFunctionTable = new SignatureToFunctionTable();
+    public apiFunction: APIFunctionToFunctionTable = new APIFunctionToFunctionTable();
+
     public scope: Scope = new Scope();
 
     public constructor(typeChecker: ts.TypeChecker) {

@@ -13,6 +13,9 @@ function mangleParameters(parameters: ts.NodeArray<ts.ParameterDeclaration>): st
                             return 'PKc';
                         case ts.SyntaxKind.BooleanKeyword:
                             return 'b';
+                        case ts.SyntaxKind.TypeReference: {
+                            return parameter.type.getText();
+                        }
                         default:
                             throw new Error(
                                 `Unsupported mangling parameter type: ${parameter.type.kind}`

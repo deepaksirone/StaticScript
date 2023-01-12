@@ -124,7 +124,7 @@ function extractNameFromObjectType(
     return name;
 }
 
-function mangleNameFromDeclaration(
+export function mangleNameFromDeclaration(
     declaration: ts.SignatureDeclaration,
     ctx: Context,
     mangler: ManglerInterface
@@ -499,8 +499,8 @@ export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Cont
                 false
             );*/
 	    
-	    const value = generateAssignment(block, defaultValue, ctx, builder);
-
+            const value = generateAssignment(block, defaultValue, ctx, builder);
+            console.log("Generated Assignment")
             ctx.scope.variables.set(<string>block.name.escapedText, new Primitive(value, defaultValue.getType()));
         } else {
             ctx.scope.variables.set(<string>block.name.escapedText, defaultValue);

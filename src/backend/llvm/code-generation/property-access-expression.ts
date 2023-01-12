@@ -38,6 +38,7 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
     generate(node: ts.PropertyAccessExpression, ctx: Context, builder: llvm.IRBuilder, nativeType?: NativeType): Value {
 	// Check if the property is an ingredient:
 	let fullFnName = getFullnameFromProperty(node);
+	console.log(`[PropertyAccessExpressionCodeGenerator] The full name: ${fullFnName}`)
 	let isRuleIngredientTuple = IsRuleIngredient(fullFnName, ctx.llvmContext);
 	if (isRuleIngredientTuple[0]) {
 		//console.log("Fixing up ingredient ConditionImageURL");

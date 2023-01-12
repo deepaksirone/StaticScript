@@ -31,7 +31,7 @@ interface RegExp {}
 
 interface String {}
 
-interface Array {
+interface Array<T> {
 	length: number;
 }
 
@@ -44,11 +44,12 @@ declare class Action {
 }
 
 declare class MomentJS {
-	add(rhs: MomentJS);
-	add(n: number, s: string);
+	add(rhs: MomentJS): MomentJS;
+	add(n: number, s: string): MomentJS;
 	toString(): string;
 }
 declare function moment(): MomentJS;
+declare function moment(t: MomentJS, format: string): MomentJS;
 declare function moment(s: string, format: string): MomentJS;
 
 declare class TriggerData {
