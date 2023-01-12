@@ -36,8 +36,8 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
     const signature = ctx.typeChecker.getResolvedSignature(method_call_node);
     let fn_name = mangleNameFromDeclaration(<ts.SignatureDeclaration>signature.declaration, ctx, CPPMangler);
 
-    if (ctx.apiFunction.has(fn_name)) {
-        return ctx.apiFunction.get(fn_name);
+    if (ctx.signature.has(signature)) {
+        return ctx.signature.get(signature);
     }
 
     const method_decl = (<ts.MethodDeclaration>(<ts.SignatureDeclaration>signature.declaration));
@@ -61,7 +61,7 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
 
     let fn_type = llvm.FunctionType.get(return_type.getType(), params, false);
     let fn = llvm.Function.create(fn_type, llvm.LinkageTypes.ExternalLinkage, fn_name, ctx.llvmModule);
-    ctx.apiFunction.set(fn_name, fn);
+    ctx.signature.set(signature, fn);
     return fn;
 }
 
