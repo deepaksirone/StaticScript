@@ -80,3 +80,16 @@ declare class addDetailedEventObj {
 declare class GoogleCalendar {
 	static addDetailedEvent: addDetailedEventObj;
 }
+
+declare class LutronCasetaWireless {
+	static setScene: Action;
+}
+
+declare class BufferPhoto {
+	setPhotoUrl(s: string);
+	setMessage(m: string);
+}
+
+declare class Buffer {
+	static addToBufferWithPhoto: BufferPhoto;
+}

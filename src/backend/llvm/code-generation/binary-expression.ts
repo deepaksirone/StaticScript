@@ -3,6 +3,7 @@ import * as ts from "typescript";
 import * as llvm from 'llvm-node';
 import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
+import {NativeType} from "../native-type";
 import {Primitive, Value, ValueTypeEnum} from "../value";
 import UnsupportedError from "../../error/unsupported.error";
 import {buildFromExpression, loadIfNeeded} from "../index";
@@ -58,12 +59,48 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                 const left = buildFromExpression(node.left, ctx, builder);
                 const right = buildFromExpression(node.right, ctx, builder);
 
-                return new Primitive(
-                    builder.createFAdd(
-                        loadIfNeeded(left, builder),
-                        loadIfNeeded(right, builder)
-                    )
-                );
+                if (left.getType() != right.getType()) {
+                    console.log("LHS Type: " + left.getType());
+                    console.log("RHS Type: " + right.getType());
+                    //TODO: Handle Type conversions
+                    throw new UnsupportedError (node, "Type conversions unsupported");
+                } else {
+                    switch (left.getType()) {
+                        case ValueTypeEnum.STRING: {
+                            // Generate a call to strcat function
+                            // Return type for string type here
+                            if (!ctx.apiFunction.has("__str_concat")) {
+                                let return_type = new NativeType(llvm.Type.getInt8PtrTy(ctx.llvmContext));
+                                let params = [llvm.Type.getInt8PtrTy(ctx.llvmContext), llvm.Type.getInt8PtrTy(ctx.llvmContext)];
+                                let fn_type = llvm.FunctionType.get(return_type.getType(), params, false);
+                                let fn_name = "__str_concat"; 
+                                let fn = llvm.Function.create(fn_type, llvm.LinkageTypes.ExternalLinkage, fn_name, ctx.llvmModule);
+                                let args = [loadIfNeeded(left, builder), loadIfNeeded(right, builder)]
+                                let call_expr = builder.createCall(fn, args);
+                                ctx.apiFunction.set("__str_concat", fn);
+                                return new Primitive(call_expr, ValueTypeEnum.STRING);
+                            } else {
+                                let fn = ctx.apiFunction.get("__str_concat");
+                                let args = [loadIfNeeded(left, builder), loadIfNeeded(right, builder)]
+                                let call_expr = builder.createCall(fn, args);
+                                return new Primitive(call_expr, ValueTypeEnum.STRING);
+                            }
+
+                        }
+                        default: {
+                            return new Primitive(
+                                builder.createFAdd(
+                                    loadIfNeeded(left, builder),
+                                    loadIfNeeded(right, builder)
+                                )
+                            );
+                        }
+                    }
+                }
+
+
+                
+               
             }
             case ts.SyntaxKind.MinusEqualsToken:
             case ts.SyntaxKind.MinusToken: {

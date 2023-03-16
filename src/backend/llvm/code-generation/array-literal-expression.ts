@@ -66,7 +66,7 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
 		const val = buildFromExpression(node.elements[i], ctx, builder);
 		const arrIdx1 = llvm.ConstantInt.get(ctx.llvmContext, i, 64);
 		const arrIdx2 = llvm.ConstantInt.get(ctx.llvmContext, 0, 64);
-		const idxArray : Array<llvm.Value> = [arrIdx1, arrIdx2];
+		const idxArray : Array<llvm.Value> = [arrIdx2, arrIdx1];
 		const arrayPtr = builder.createInBoundsGEP(array, idxArray);
 		builder.createStore(val.getValue(), arrayPtr);
 	}

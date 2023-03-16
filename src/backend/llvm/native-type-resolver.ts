@@ -7,6 +7,7 @@ import {isJSRuntimeType, generate_runtime_struct_type} from "./code-generation/a
 
 export class NativeTypeResolver {
     static getType(type: ts.Type, ctx: Context): NativeType|null {
+        console.log("--Resolving Type Symbol: ");
         if (type.isNumberLiteral() || (<any>type).intrinsicName === 'number') {
             return new NativeType(
                 llvm.Type.getDoubleTy(
@@ -20,6 +21,7 @@ export class NativeTypeResolver {
          */
         if (type.symbol && <string>type.symbol.escapedName === 'Array' && (<ts.GenericType>type).typeArguments) {
             const genericType = type as ts.GenericType;
+            console.log("--Resolving Array Type--");
             return NativeTypeResolver.getType(genericType.typeArguments[0], ctx);
         }
         
