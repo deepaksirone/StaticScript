@@ -23,6 +23,17 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 }
             }
         }
+
+        case "Number" : {
+            switch (method_name) {
+                case "toString": {
+                    return true;
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
         default: {
             return false;
         }
@@ -62,6 +73,8 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
     let fn_type = llvm.FunctionType.get(return_type.getType(), params, false);
     let fn = llvm.Function.create(fn_type, llvm.LinkageTypes.ExternalLinkage, fn_name, ctx.llvmModule);
     ctx.signature.set(signature, fn);
+    // Testing setting this here
+    ctx.apiFunction.set(fn_name, fn);
     return fn;
 }
 
@@ -71,7 +84,7 @@ export function generateAPIFunctionCall(class_name: string,
 
     let fn = declareAPIFunction(class_name, method_name, method_call_node, ctx);
 
-    let args = [class_argument.getValue()];
+    let args = [loadIfNeeded(class_argument, builder)];
     args.push(...method_call_node.arguments.map((expr) => {
         return loadIfNeeded(
             buildFromExpression(<any>expr, ctx, builder), builder

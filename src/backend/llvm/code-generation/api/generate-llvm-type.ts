@@ -10,6 +10,9 @@ export function generate_runtime_struct_type(type: string, ctx: Context): llvm.T
         case "MomentJS": {
             return llvm.StructType.get(ctx.llvmContext, [llvm.Type.getDoubleTy(ctx.llvmContext)]);
         }
+        case "Number" : {
+            return llvm.Type.getDoubleTy(ctx.llvmContext);
+        }
         default: 
             throw new Error(
                 `Unsupported type, "${type}"`

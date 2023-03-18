@@ -1,4 +1,5 @@
 
+
 declare type int8 = {};
 declare type int16 = {};
 declare type int32 = {};
@@ -22,25 +23,40 @@ interface Function {}
 interface IArguments {}
 
 interface Number {
-	toString()
+	toString(): string;
+	toFixed(n: number): number;
 }
 
 interface Object {}
 
 interface RegExp {}
 
-interface String {}
+interface String {
+	concat(s: string): string;
+	replace(s: RegExp, t: string): string;
+	constructor(f: number): string;
+	indexOf(s: string): number;
+	length: number;
+	match(s: string): Array<string>;
+}
 
 interface Array<T> {
 	length: number;
+	join(s: string): string;
+	toString(): string;
 }
 
 declare function puts(str: string): void;
 
+
 declare function parseInt(str: string): number;
+declare function parseFloat(str: string): number;
+declare function parseFloat(s: number): number;
+declare function String(n: number): string;
 
 declare class Action {
 	skip(): void;
+	skip(s: string): void;
 }
 
 declare class MomentJS {
@@ -93,3 +109,72 @@ declare class BufferPhoto {
 declare class Buffer {
 	static addToBufferWithPhoto: BufferPhoto;
 }
+
+declare class NestThermostat {
+	static setTemperature: Action;
+}
+
+declare class Hue {
+	static setColorAllHue: Action;
+}
+
+declare class IfNotifications {
+	static sendNotification: Action;
+}
+
+declare class Skybell {
+	static record60sOfVideo: Action;
+}
+
+declare class Email {
+	static sendMeEmail: Action;
+}
+
+declare class SpotifyTrackPlayListAdded {
+	AddedBy: string;
+	TrackName: string;
+	TrackURL: string;
+	ArtistName: string;
+	AlbumName: string;
+	PlaylistName: string;
+}
+
+declare class Spotify {
+	static newTrackAddedToPlaylist: SpotifyTrackPlayListAdded;
+}
+
+declare class Gmail {
+
+}
+
+declare class Trigger {
+	static LinkToProfile: string;
+	static EntryTitle: string;
+	static Text: string;
+}
+
+declare class Tweet {
+	setTweet(s: string);
+	skip();
+}
+
+declare class Twitter {
+	static postNewTweet: Tweet;
+}
+
+declare class FeedEntry {
+	EntryTitle: string;
+}
+
+declare class Feed {
+	static newFeedItem: FeedEntry;
+}
+
+declare class Telegram {
+	static sendMessage: Action;
+}
+
+declare class Evernote {
+	static appendToNote: Action;
+}
+

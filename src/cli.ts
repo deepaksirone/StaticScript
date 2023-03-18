@@ -69,6 +69,7 @@ try {
 	llvmModule = generateModuleFromProgram(program, "__rule_function");
     }
 
+    console.log(llvmModule.print());
     llvm.verifyModule(llvmModule);
 
     if (cliOptions.printIR) {

@@ -43,9 +43,13 @@ export class IfStatementCodeGenerator implements NodeGenerateInterface<ts.IfStat
             } else {*/
             passNode(node.elseStatement, ctx, builder);
  
-            //if (!negativeBlock.getTerminator()) {
-            builder.createBr(next);
-            //}
+            // TODO: Fix this bug here!
+            /*if (!negativeBlock.getTerminator()) {
+                builder.createBr(next);
+            }*/
+            if (!builder.getInsertBlock().getTerminator()) {
+                builder.createBr(next);
+            }
 
         } else {
             emitCondition(
@@ -60,9 +64,13 @@ export class IfStatementCodeGenerator implements NodeGenerateInterface<ts.IfStat
         builder.setInsertionPoint(positiveBlock);
         passNode(node.thenStatement, ctx, builder);
 
-        //if (!positiveBlock.getTerminator()) {
-        builder.createBr(next);
-        //}
+        /*
+        if (!positiveBlock.getTerminator()) {
+            builder.createBr(next);
+        }*/
+        if (!builder.getInsertBlock().getTerminator()) {
+            builder.createBr(next);
+        }
 
         builder.setInsertionPoint(next);
     }

@@ -63,6 +63,13 @@ export function buildFromStringValue(node: ts.StringLiteral, ctx: Context, build
     return buildFromString(node.text, ctx, builder);
 }
 
+export function buildFromRegularExpressionValue(node: ts.RegularExpressionLiteral, ctx: Context, builder: llvm.IRBuilder): Value {
+    return new Primitive(
+        builder.createGlobalStringPtr(node.text),
+        ValueTypeEnum.STRING
+    );
+}
+
 export function buildFromTrueKeyword(node: ts.BooleanLiteral, ctx: Context, builder: llvm.IRBuilder): Value {
     return new Primitive(
         llvm.ConstantInt.get(
@@ -163,7 +170,13 @@ export function buildCalleFromSignature(
     fnName?: string
 ): llvm.Function|null {
     if (ctx.signature.has(signature)) {
-        return ctx.signature.get(signature);
+        if (!fnName) {
+            return ctx.signature.get(signature);
+        } else {
+            if (ctx.apiFunction.has(fnName)) {
+                return ctx.apiFunction.get(fnName);
+            }
+        }
     }
 
     const declaration = <ts.SignatureDeclaration>signature.declaration;
@@ -181,7 +194,7 @@ export function buildCalleFromSignature(
                );
 
                ctx.signature.set(signature, llvmFunction);
-
+               ctx.apiFunction.set(fnName, llvmFunction);
                return llvmFunction;
 	    } else {
 	       llvmFunction = declareFunctionFromDefinition(
@@ -208,7 +221,7 @@ export function buildCalleFromSignature(
                );
 
                ctx.signature.set(signature, llvmFunction);
-
+               ctx.apiFunction.set(fnName, llvmFunction);
                return llvmFunction;
             } else {
                llvmFunction = declareFunctionFromDefinition(
@@ -273,12 +286,14 @@ function declareFunctionFromDefinition(
         returnType,
         stmt.parameters.map((parameter) => {
             if (parameter.type) {
+                let t: ts.ParameterDeclaration = parameter;
                 const nativeType = NativeTypeResolver.getType(ctx.typeChecker.getTypeFromTypeNode(parameter.type), ctx);
                 if (nativeType) {
                     return nativeType.getType();
                 }
             }
 
+            console.log(parameter.type.getFullText());
             throw new UnsupportedError(
                 stmt,
                 `Unsupported parameter`
@@ -383,6 +398,8 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
 	    return null
 	case ts.SyntaxKind.ElementAccessExpression:
 	    return new ElementAccessExpressionGenerator().generate(block as ts.ElementAccessExpression, ctx, builder);
+    case ts.SyntaxKind.RegularExpressionLiteral:
+        return buildFromRegularExpressionValue(<any>block, ctx, builder);
         default:
 	    //console.trace();
 	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);

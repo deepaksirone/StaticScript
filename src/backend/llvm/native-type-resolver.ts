@@ -4,6 +4,7 @@ import * as llvm from 'llvm-node';
 import {Context} from "./context";
 import {NativeType} from "./native-type";
 import {isJSRuntimeType, generate_runtime_struct_type} from "./code-generation/api/generate-llvm-type"
+import { TypeOfExpressionCodeGenerator } from './code-generation/typeof-expression';
 
 export class NativeTypeResolver {
     static getType(type: ts.Type, ctx: Context): NativeType|null {
@@ -23,6 +24,14 @@ export class NativeTypeResolver {
             const genericType = type as ts.GenericType;
             console.log("--Resolving Array Type--");
             return NativeTypeResolver.getType(genericType.typeArguments[0], ctx);
+        }
+
+        if (type.symbol && <string>type.symbol.escapedName == "RegExp") {
+            return new NativeType(
+                llvm.Type.getInt8PtrTy(
+                    ctx.llvmContext
+                )
+            );
         }
         
         if (type.symbol) {
