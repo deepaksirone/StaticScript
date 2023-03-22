@@ -117,6 +117,15 @@ function buildFromNumericLiteral(
     );
 }
 
+function buildFromNullExpr(value: ts.NullLiteral, 
+    ctx: Context,
+    builder: llvm.IRBuilder): Value {
+        return new Primitive(
+            llvm.ConstantPointerNull.get(llvm.Type.getInt8PtrTy(ctx.llvmContext)),
+            ValueTypeEnum.STRING
+        );
+}
+
 function extractNameFromObjectType(
     type: ts.ObjectType
 ): string {
@@ -364,7 +373,7 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
         case ts.SyntaxKind.NewExpression:
             return new NewExpressionGenerator().generate(<any>block, ctx, builder);
         case ts.SyntaxKind.PropertyAccessExpression:
-	    console.log("Generating code for PropertyAccessExpression");	
+	        console.log("Generating code for PropertyAccessExpression");	
             return new PropertyAccessExpressionCodeGenerator().generate(<any>block, ctx, builder);
         case ts.SyntaxKind.Identifier:
             return buildFromIdentifier(<any>block, ctx, builder);
@@ -392,14 +401,16 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
             return new TypeOfExpressionCodeGenerator().generate(block as ts.TypeOfExpression, ctx, builder);
         case ts.SyntaxKind.ParenthesizedExpression:
             return buildFromExpression((<ts.ParenthesizedExpression>block).expression, ctx, builder);
-	case ts.SyntaxKind.ObjectLiteralExpression:
-	    // Create a map and store it in a variable here
-	    buildFromObjectLiteralExpression(<ts.ObjectLiteralExpression>block, ctx, builder);
-	    return null
-	case ts.SyntaxKind.ElementAccessExpression:
-	    return new ElementAccessExpressionGenerator().generate(block as ts.ElementAccessExpression, ctx, builder);
-    case ts.SyntaxKind.RegularExpressionLiteral:
-        return buildFromRegularExpressionValue(<any>block, ctx, builder);
+	    case ts.SyntaxKind.ObjectLiteralExpression:
+	        // Create a map and store it in a variable here
+	        buildFromObjectLiteralExpression(<ts.ObjectLiteralExpression>block, ctx, builder);
+	        return null
+	    case ts.SyntaxKind.ElementAccessExpression:
+	        return new ElementAccessExpressionGenerator().generate(block as ts.ElementAccessExpression, ctx, builder);
+        case ts.SyntaxKind.RegularExpressionLiteral:
+            return buildFromRegularExpressionValue(<any>block, ctx, builder);
+        case ts.SyntaxKind.NullKeyword:
+            return buildFromNullExpr(<any>block, ctx, builder);
         default:
 	    //console.trace();
 	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);

@@ -9,7 +9,7 @@ import UnsupportedError from "../../error";
 import {buildCalleFromCallExpression, buildFromExpression, loadIfNeeded} from "../index";
 import {isAPIFunction, generateAPIFunctionCall} from "./api/ap-fns"
 
-function getFullnameFromCallExpression(node: ts.Expression): string {
+export function getFullnameFromCallExpression(node: ts.Expression): string {
         switch (node.kind) {
                 case ts.SyntaxKind.PropertyAccessExpression:
                         return getFullnameFromCallExpression((<ts.PropertyAccessExpression>node).expression) + '_' + <string>(<ts.PropertyAccessExpression>node).name.escapedText;

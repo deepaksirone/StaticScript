@@ -25,6 +25,7 @@ interface IArguments {}
 interface Number {
 	toString(): string;
 	toFixed(n: number): number;
+	constructor(): number;
 }
 
 interface Object {}
@@ -53,6 +54,7 @@ declare function parseInt(str: string): number;
 declare function parseFloat(str: string): number;
 declare function parseFloat(s: number): number;
 declare function String(n: number): string;
+declare function Number(): number;
 
 declare class Action {
 	skip(): void;
@@ -63,6 +65,10 @@ declare class MomentJS {
 	add(rhs: MomentJS): MomentJS;
 	add(n: number, s: string): MomentJS;
 	toString(): string;
+	day(): number;
+	hour(): number;
+	constructor();
+	constructor(s: string);
 }
 declare function moment(): MomentJS;
 declare function moment(t: MomentJS, format: string): MomentJS;

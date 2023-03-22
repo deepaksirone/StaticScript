@@ -3,6 +3,7 @@ import * as ts from "typescript";
 import * as llvm from "llvm-node";
 import {Scope} from "./scope";
 import {ArrayLiteralExpressionCodeGenerator} from "./code-generation/array-literal-expression";
+import {generate_runtime_struct_type} from "./code-generation/api/generate-llvm-type"
 
 export class SignatureToFunctionTable extends Map<ts.Signature, llvm.Function> {
 
@@ -75,6 +76,8 @@ export class Context {
             this,
             'array<float64>'
         ));
+
+        this.scope.classes.set('MomentJS', <llvm.StructType>generate_runtime_struct_type("MomentJS", this));
     }
 
     getIntrinsic(functionName: string): llvm.Function {

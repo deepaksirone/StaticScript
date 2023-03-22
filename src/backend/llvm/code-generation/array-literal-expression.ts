@@ -23,16 +23,16 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
             ctx,
             `array<${nativeType.getType().toString()}>`
         );*/
-
+        // Store a Null Pointer at the end
         const arrayType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayLLVMType(nativeType.getType(), node.elements.length, ctx, `array<${nativeType.getType().toString()}>`);
 
-	console.log(`Array native type: ${arrayType.toString()}`);
+	    console.log(`Array native type: ${arrayType.toString()}`);
 
         const allocate = builder.createAlloca(
             arrayType
         );
 
-	// Store each element into the array
+	    // Store each element into the array
         ArrayLiteralExpressionCodeGenerator.storeIntoArray(node, ctx, builder, allocate);	
 
         return new ArrayReference(
@@ -57,19 +57,20 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
     }
 
     static buildTypedArrayLLVMType(elementType: llvm.Type, numElements: number, ctx: Context, name: string): llvm.ArrayType {
-	const type = llvm.ArrayType.get(elementType, numElements);
-	return type;
+	    const type = llvm.ArrayType.get(elementType, numElements);
+	    return type;
     }
 
     static storeIntoArray(node: ts.ArrayLiteralExpression, ctx: Context, builder: llvm.IRBuilder, array: llvm.AllocaInst) {
-	for (var i = 0; i < node.elements.length; i++) {
-		const val = buildFromExpression(node.elements[i], ctx, builder);
-		const arrIdx1 = llvm.ConstantInt.get(ctx.llvmContext, i, 64);
-		const arrIdx2 = llvm.ConstantInt.get(ctx.llvmContext, 0, 64);
-		const idxArray : Array<llvm.Value> = [arrIdx2, arrIdx1];
-		const arrayPtr = builder.createInBoundsGEP(array, idxArray);
-		builder.createStore(val.getValue(), arrayPtr);
-	}
+	    for (var i = 0; i < node.elements.length; i++) {
+		    const val = buildFromExpression(node.elements[i], ctx, builder);
+		    const arrIdx1 = llvm.ConstantInt.get(ctx.llvmContext, i, 64);
+		    const arrIdx2 = llvm.ConstantInt.get(ctx.llvmContext, 0, 64);
+		    const idxArray : Array<llvm.Value> = [arrIdx2, arrIdx1];
+		    const arrayPtr = builder.createInBoundsGEP(array, idxArray);
+		    builder.createStore(val.getValue(), arrayPtr);
+	    }
+
     }
 	
 }

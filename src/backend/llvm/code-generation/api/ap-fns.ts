@@ -34,6 +34,17 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 }
             }
         }
+
+        case "String" : {
+            switch (method_name) {
+                case "match": {
+                    return true;
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
         default: {
             return false;
         }
@@ -80,7 +91,7 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
 
 export function generateAPIFunctionCall(class_name: string, 
     method_name: string, class_argument: Value, 
-    method_call_node: ts.CallExpression, ctx: Context, builder: llvm.IRBuilder): llvm.Value {
+    method_call_node: ts.CallExpression, ctx: Context, builder: llvm.IRBuilder): llvm.CallInst {
 
     let fn = declareAPIFunction(class_name, method_name, method_call_node, ctx);
 

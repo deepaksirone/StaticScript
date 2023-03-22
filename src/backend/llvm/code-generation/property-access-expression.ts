@@ -7,7 +7,7 @@ import {NativeType} from "../native-type";
 import {Primitive, ArrayReference, Value, ValueTypeEnum, convertLLVMTypeToValueType} from "../value";
 import UnsupportedError from "../../error";
 import {IsRuleIngredient} from "./rule-ingredient"
-import {buildFromExpression} from "../index";
+import {buildFromExpression, loadIfNeeded} from "../index";
 
 function getFullnameFromProperty(node: ts.Expression): string {
 	switch (node.kind) {
@@ -67,11 +67,38 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 		let propertyName = <string>(<ts.PropertyAccessExpression>node).name.escapedText;
 		switch (propertyName) {
 			case "length":
-				const arr_ref: ArrayReference = <ArrayReference>ctx.scope.variables.get(<string>(<ts.Identifier>node.expression).escapedText);
-				return new Primitive(
-            				llvm.ConstantFP.get(ctx.llvmContext, arr_ref.getNumElements()),
-            				ValueTypeEnum.DOUBLE
-        			);
+				//const arr_ref: ArrayReference = <ArrayReference>ctx.scope.variables.get(<string>(<ts.Identifier>node.expression).escapedText);
+				const variable = ctx.scope.variables.get(<string>(<ts.Identifier>node.expression).escapedText);
+				if (variable.isString()) {
+					// Generate __str_len call
+					if (!ctx.apiFunction.has("__str_len")) {
+						let return_type = new NativeType(llvm.Type.getDoubleTy(ctx.llvmContext));
+						let params = [llvm.Type.getInt8PtrTy(ctx.llvmContext)];
+						let fn_type = llvm.FunctionType.get(return_type.getType(), params, false);
+						let fn_name = "__str_len"; 
+						let fn = llvm.Function.create(fn_type, llvm.LinkageTypes.ExternalLinkage, fn_name, ctx.llvmModule);
+						let args = [loadIfNeeded(variable, builder)]
+						let call_expr = builder.createCall(fn, args);
+
+						//let res = builder.createICmpNE(call_expr, llvm.ConstantInt.get(ctx.llvmContext, 0, 32));
+						ctx.apiFunction.set("__str_len", fn);
+						return new Primitive(call_expr, ValueTypeEnum.DOUBLE);
+					} else {
+						let fn = ctx.apiFunction.get("__str_len");
+						let args = [loadIfNeeded(variable, builder)]
+						let call_expr = builder.createCall(fn, args);
+
+						return new Primitive(call_expr, ValueTypeEnum.DOUBLE);
+					}
+				} 
+				//Array Type
+				else {
+					return new Primitive(
+						llvm.ConstantFP.get(ctx.llvmContext, (<ArrayReference>variable).getNumElements()),
+						ValueTypeEnum.DOUBLE
+					);
+				}
+				
 			default:
 
 		}

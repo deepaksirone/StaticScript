@@ -393,6 +393,51 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
 		    );
 
         }
+
+        case ts.SyntaxKind.ExclamationEqualsToken: {
+            const left = buildFromExpression(node.left, ctx, builder);
+		    const right = buildFromExpression(node.right, ctx, builder);
+
+
+            if (left.getType() != right.getType()) {
+                console.log("LHS Type: " + left.getType());
+                console.log("RHS Type: " + right.getType());
+                //TODO: Handle Type conversions
+                throw new UnsupportedError (node, "Type conversions unsupported");
+            } else {
+                switch (left.getType()) {
+                    case ValueTypeEnum.STRING: {
+                        if (!ctx.apiFunction.has("__str_cmp")) {
+                            let return_type = new NativeType(llvm.Type.getInt32Ty(ctx.llvmContext));
+                            let params = [llvm.Type.getInt8PtrTy(ctx.llvmContext), llvm.Type.getInt8PtrTy(ctx.llvmContext)];
+                            let fn_type = llvm.FunctionType.get(return_type.getType(), params, false);
+                            let fn_name = "__str_cmp"; 
+                            let fn = llvm.Function.create(fn_type, llvm.LinkageTypes.ExternalLinkage, fn_name, ctx.llvmModule);
+                            let args = [loadIfNeeded(left, builder), loadIfNeeded(right, builder)]
+                            let call_expr = builder.createCall(fn, args);
+
+                            let res = builder.createICmpNE(call_expr, llvm.ConstantInt.get(ctx.llvmContext, 0, 32));
+                            ctx.apiFunction.set("__str_cmp", fn);
+                            return new Primitive(res, ValueTypeEnum.BOOLEAN);
+                        } else {
+                            let fn = ctx.apiFunction.get("__str_cmp");
+                            let args = [loadIfNeeded(left, builder), loadIfNeeded(right, builder)]
+                            let call_expr = builder.createCall(fn, args);
+                            let res = builder.createICmpNE(call_expr, llvm.ConstantInt.get(ctx.llvmContext, 0, 32));
+                            return new Primitive(res, ValueTypeEnum.BOOLEAN);
+                        }
+                    }
+
+                    default:
+                        return new Primitive(
+                            builder.createFCmpONE(
+                                loadIfNeeded(left, builder),
+                                loadIfNeeded(right, builder)
+                            )
+                        );
+                }
+            }
+        }
             default:
                 throw new UnsupportedError(
                     node,
