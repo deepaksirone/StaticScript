@@ -74,6 +74,10 @@ declare function moment(): MomentJS;
 declare function moment(t: MomentJS, format: string): MomentJS;
 declare function moment(s: string, format: string): MomentJS;
 
+declare class Date {
+	constructor();
+}
+
 declare class TriggerData {
 	ConditionImageURL: string;
 }

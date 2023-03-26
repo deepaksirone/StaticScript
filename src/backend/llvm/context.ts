@@ -78,6 +78,7 @@ export class Context {
         ));
 
         this.scope.classes.set('MomentJS', <llvm.StructType>generate_runtime_struct_type("MomentJS", this));
+        this.scope.classes.set('Date', <llvm.StructType>generate_runtime_struct_type("Date", this));
     }
 
     getIntrinsic(functionName: string): llvm.Function {

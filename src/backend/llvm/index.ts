@@ -165,6 +165,18 @@ export function mangleNameFromDeclaration(
         );
     }
 
+    if (declaration.kind === ts.SyntaxKind.Constructor) {
+        const left = ctx.typeChecker.getTypeAtLocation(declaration.parent!) as ts.ObjectType;
+
+        return mangler.getMethodName(
+            extractNameFromObjectType(left),
+            <string>(<any>declaration.name),
+            declaration.parameters
+        );
+
+    }
+
+
     return mangler.getFunctionName(
         <string>(<ts.Identifier>declaration.name).escapedText,
         declaration.parameters
@@ -466,6 +478,7 @@ function generateAssignment(block: ts.VariableDeclaration, rhs: Value, ctx: Cont
 			}
 
 			break;
+        case ValueTypeEnum.OBJECT:
 		case ValueTypeEnum.DOUBLE:
 			value = builder.createAlloca(
                                         rhs.getValue().type,
@@ -530,6 +543,14 @@ export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Cont
             const value = generateAssignment(block, defaultValue, ctx, builder);
             console.log("Generated Assignment")
             ctx.scope.variables.set(<string>block.name.escapedText, new Primitive(value, defaultValue.getType()));
+        } else if (defaultValue instanceof ObjectReference) {
+            console.log(`Type of alloca var: ${defaultValue.getValue().type.toString()}`);
+            const value = generateAssignment(block, defaultValue, ctx, builder);
+            console.log("Generated Assignment");
+            let class_ref = (<ObjectReference>defaultValue).classReference;
+            let call_inst = (<ObjectReference>defaultValue).llvmValue;
+
+            ctx.scope.variables.set(<string>block.name.escapedText, new ObjectReference(class_ref, call_inst));
         } else {
             ctx.scope.variables.set(<string>block.name.escapedText, defaultValue);
         }

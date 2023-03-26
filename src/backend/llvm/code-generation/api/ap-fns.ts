@@ -89,6 +89,44 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
     return fn;
 }
 
+function declareConstructorFunction(node: ts.NewExpression, ctx: Context, builder: llvm.IRBuilder): llvm.Function {
+    const signature = ctx.typeChecker.getResolvedSignature(node);
+    (<any>signature.declaration).name = 'constructor';
+
+    if (ctx.signature.has(signature)) {
+        return ctx.signature.get(signature);
+    }
+
+    let fn_name = mangleNameFromDeclaration(<ts.SignatureDeclaration>signature.declaration, ctx, CPPMangler);
+    //console.log(`[New Expr] Generating Code for Method: ${method_name}`);
+    const method_decl = (<ts.MethodDeclaration>(<ts.SignatureDeclaration>signature.declaration));
+    let parent = (<ts.MethodDeclaration>(<ts.SignatureDeclaration>signature.declaration)).parent;
+    let parent_class = (<ts.ClassDeclaration>parent).name.escapedText.toString();
+
+    let return_type = generate_runtime_struct_type(parent_class, ctx);
+    let _params = method_decl.parameters.map((parameter) => {
+        if (parameter.type) {
+            const nativeType = NativeTypeResolver.getType(ctx.typeChecker.getTypeFromTypeNode(parameter.type), ctx);
+            if (nativeType) {
+                return nativeType.getType();
+            }
+        }
+
+        throw new UnsupportedError(
+            method_decl,
+            `Unsupported Parameter in Method Declaration`
+        );
+    });
+
+    let fn_type = llvm.FunctionType.get(return_type, _params, false);
+
+    let fn = llvm.Function.create(fn_type, llvm.LinkageTypes.ExternalLinkage, fn_name, ctx.llvmModule);
+    ctx.signature.set(signature, fn);
+
+    return fn;
+
+}
+
 export function generateAPIFunctionCall(class_name: string, 
     method_name: string, class_argument: Value, 
     method_call_node: ts.CallExpression, ctx: Context, builder: llvm.IRBuilder): llvm.CallInst {
@@ -104,4 +142,19 @@ export function generateAPIFunctionCall(class_name: string,
 
     let call = builder.createCall(fn, args);
     return call;
+}
+
+export function generateConstructorCall(node: ts.NewExpression, ctx: Context, builder: llvm.IRBuilder): llvm.CallInst {
+    
+    let fn = declareConstructorFunction(node, ctx, builder);
+
+    const args = node.arguments.map((expr) => {
+        return loadIfNeeded(
+            buildFromExpression(<any>expr, ctx, builder), builder
+        );
+    });
+
+    let call = builder.createCall(fn, args);
+    return call;
+
 }

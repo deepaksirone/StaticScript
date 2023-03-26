@@ -11,6 +11,7 @@ export enum ValueTypeEnum {
     BOOLEAN = 'BOOLEAN',
     //
     UNKNOWN = 'UNKNOWN',
+    OBJECT = 'OBJECT',
     //
     INT8 = 'INT8',
     INT16 = 'INT16',
@@ -115,7 +116,8 @@ export class ObjectReference implements Value {
     }
 
     getType(): ValueTypeEnum {
-        throw new Error('It is not a Primitive, it is ObjectReference (=ↀωↀ=)');
+        //throw new Error('It is not a Primitive, it is ObjectReference (=ↀωↀ=)');
+        return ValueTypeEnum.OBJECT;
     }
 
     public toBoolean(ctx: Context, builder: llvm.IRBuilder, node: ts.Node): Value {
