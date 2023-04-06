@@ -2,8 +2,38 @@ import * as ts from "typescript";
 import * as llvm from 'llvm-node';
 
 
-let IngredientNames: Array<string> = ["Weather_tomorrowsForecastCallsFor_ConditionImageURL", "AndroidPhone_placeAPhoneCall_CallLength", "AndroidPhone_placeAPhoneCall_OccurredAt", "Feed_newFeedItem_EntryTitle", "Trigger_EntryTitle", "Trigger_Text"];
-let IngredientTypes: Array<string> = ["string", "string", "string", "string", "string", "string"];
+let IngredientNames: Array<string> = [
+	"Weather_tomorrowsForecastCallsFor_ConditionImageURL", 
+	"AndroidPhone_placeAPhoneCall_CallLength", 
+	"AndroidPhone_placeAPhoneCall_OccurredAt", 
+	"Feed_newFeedItem_EntryTitle", 
+	"Trigger_EntryTitle", 
+	"Trigger_Text", 
+	"Trigger_LinkToProfile",
+	"SpotifyTrackPlayListAdded_AddedBy",
+	"SpotifyTrackPlayListAdded_TrackName",
+	"SpotifyTrackPlayListAdded_TrackURL",
+	"SpotifyTrackPlayListAdded_ArtistName",
+	"SpotifyTrackPlayListAdded_AlbumName",
+	"SpotifyTrackPlayListAdded_PlaylistName",
+	"GoogleDrive_anyNewPhoto_PhotoUrl",
+	"GoogleDrive_anyNewPhoto_Filename"];
+let IngredientTypes: Array<string> = [
+			"string", 
+			"string", 
+			"string", 
+			"string", 
+			"string", 
+			"string", 
+			"string",
+			"string",
+			"string",
+			"string",
+			"string",
+			"string",
+			"string",
+			"string",
+			"string"];
 
 export function IsRuleIngredient(candidate: string, ctx: llvm.LLVMContext): [boolean, llvm.Type] {
 	let idx = IngredientNames.indexOf(candidate);

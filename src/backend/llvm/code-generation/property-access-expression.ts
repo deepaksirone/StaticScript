@@ -33,7 +33,6 @@ function isJSProperty(node: ts.PropertyAccessExpression): boolean {
 }
 
 
-
 export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterface<ts.PropertyAccessExpression, Value> {
     generate(node: ts.PropertyAccessExpression, ctx: Context, builder: llvm.IRBuilder, nativeType?: NativeType): Value {
 	// Check if the property is an ingredient:

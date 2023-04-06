@@ -37,14 +37,19 @@ interface String {
 	replace(s: RegExp, t: string): string;
 	constructor(f: number): string;
 	indexOf(s: string): number;
+	split(s: string): Array<string>;
+	trim(): string;
 	length: number;
 	match(s: string): Array<string>;
+	match(r: RegExp): Array<string>;
+	
 }
 
 interface Array<T> {
 	length: number;
 	join(s: string): string;
 	toString(): string;
+	slice(start: number, end: number): Array<string>;
 }
 
 declare function puts(str: string): void;
@@ -126,6 +131,7 @@ declare class NestThermostat {
 
 declare class Hue {
 	static setColorAllHue: Action;
+	static turnOnAllHue: Action;
 }
 
 declare class IfNotifications {
@@ -168,8 +174,14 @@ declare class Tweet {
 	skip();
 }
 
+declare class newTweetWithImage {
+	setTweet(s: string);
+	setPhotoUrl(s: string);
+}
+
 declare class Twitter {
 	static postNewTweet: Tweet;
+	static postNewTweetWithImage: newTweetWithImage;
 }
 
 declare class FeedEntry {
@@ -188,3 +200,33 @@ declare class Evernote {
 	static appendToNote: Action;
 }
 
+declare class GooglePhoto {
+	PhotoUrl: string;
+	Filename: string;
+}
+
+declare class GoogleDrive {
+	static anyNewPhoto: GooglePhoto;
+}
+
+declare class photoFromUrl {
+	setPhotoUrl(s: string);
+	setTitle(s: string);
+	setDescription(s: string);
+	setTags(s: string);
+}
+
+
+declare class Flickr {
+	static uploadPublicPhotoFromUrl: photoFromUrl;
+}
+
+declare class TumblrPhotoPost {
+	setSourceUrl(s: string);
+	setCaption(s: string);
+	setTags(s: string);
+}
+
+declare class Tumblr {
+	static createPhotoPost: TumblrPhotoPost;
+}

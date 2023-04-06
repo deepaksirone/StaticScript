@@ -18,6 +18,12 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 case "add": {
                     return true;
                 }
+                case "day": {
+                    return true;
+                }
+                case "hour": {
+                    return true;
+                }
                 default: {
                     return false;
                 }
@@ -29,6 +35,9 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 case "toString": {
                     return true;
                 }
+                case "toFixed": {
+                    return true;
+                }
                 default: {
                     return false;
                 }
@@ -38,6 +47,18 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
         case "String" : {
             switch (method_name) {
                 case "match": {
+                    return true;
+                }
+                case "concat": {
+                    return true;
+                }
+                case "replace": {
+                    return true;
+                }
+                case "indexOf": {
+                    return true;
+                }
+                case "trim": {
                     return true;
                 }
                 default: {

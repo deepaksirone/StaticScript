@@ -479,6 +479,7 @@ function generateAssignment(block: ts.VariableDeclaration, rhs: Value, ctx: Cont
 
 			break;
         case ValueTypeEnum.OBJECT:
+        case ValueTypeEnum.BOOLEAN:
 		case ValueTypeEnum.DOUBLE:
 			value = builder.createAlloca(
                                         rhs.getValue().type,
@@ -494,7 +495,7 @@ function generateAssignment(block: ts.VariableDeclaration, rhs: Value, ctx: Cont
 
                         return value;
 			break;
-
+        
 		default:
 			// regular load and store
 			const rhsVar = builder.createLoad(rhs.getValue());
