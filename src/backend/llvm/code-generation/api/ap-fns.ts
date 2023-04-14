@@ -7,6 +7,7 @@ import UnsupportedError from "../../../error";
 import {NativeTypeResolver} from "../../native-type-resolver";
 import {generate_runtime_struct_type} from "./generate-llvm-type"
 import {buildFromExpression, loadIfNeeded, mangleNameFromDeclaration} from "../../index";
+import { NativeType } from "../../native-type";
 
 export function isAPIFunction(class_name: string, method_name: string): Boolean {
     switch (class_name) {
@@ -61,6 +62,9 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 case "trim": {
                     return true;
                 }
+                case "charAt": {
+                    return true;
+                }
                 default: {
                     return false;
                 }
@@ -72,7 +76,7 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
     }
 }
 
-function declareAPIFunction(class_name: string, method_name: string, method_call_node: ts.CallExpression, ctx: Context): llvm.Function {
+function declareAPIFunction(class_name: string, method_name: string, method_call_node: ts.CallExpression, ctx: Context): [llvm.Function, NativeType] {
     // TODO: Handle overloaded functions
     //let fn_name = class_name + "__" + method_name;
 
@@ -80,7 +84,9 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
     let fn_name = mangleNameFromDeclaration(<ts.SignatureDeclaration>signature.declaration, ctx, CPPMangler);
 
     if (ctx.signature.has(signature)) {
-        return ctx.signature.get(signature);
+        const method_decl = (<ts.MethodDeclaration>(<ts.SignatureDeclaration>signature.declaration));
+        const return_type = NativeTypeResolver.getType(ctx.typeChecker.getTypeFromTypeNode(method_decl.type), ctx);
+        return [ctx.signature.get(signature), return_type];
     }
 
     const method_decl = (<ts.MethodDeclaration>(<ts.SignatureDeclaration>signature.declaration));
@@ -107,7 +113,7 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
     ctx.signature.set(signature, fn);
     // Testing setting this here
     ctx.apiFunction.set(fn_name, fn);
-    return fn;
+    return [fn, return_type];
 }
 
 function declareConstructorFunction(node: ts.NewExpression, ctx: Context, builder: llvm.IRBuilder): llvm.Function {
@@ -150,7 +156,7 @@ function declareConstructorFunction(node: ts.NewExpression, ctx: Context, builde
 
 export function generateAPIFunctionCall(class_name: string, 
     method_name: string, class_argument: Value, 
-    method_call_node: ts.CallExpression, ctx: Context, builder: llvm.IRBuilder): llvm.CallInst {
+    method_call_node: ts.CallExpression, ctx: Context, builder: llvm.IRBuilder): [llvm.CallInst, NativeType] {
 
     let fn = declareAPIFunction(class_name, method_name, method_call_node, ctx);
 
@@ -161,8 +167,8 @@ export function generateAPIFunctionCall(class_name: string,
         );
     }));
 
-    let call = builder.createCall(fn, args);
-    return call;
+    let call = builder.createCall(fn[0], args);
+    return [call, fn[1]];
 }
 
 export function generateConstructorCall(node: ts.NewExpression, ctx: Context, builder: llvm.IRBuilder): llvm.CallInst {

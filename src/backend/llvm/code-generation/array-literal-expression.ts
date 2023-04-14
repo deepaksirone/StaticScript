@@ -24,7 +24,9 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
             `array<${nativeType.getType().toString()}>`
         );*/
         // Store a Null Pointer at the end
-        const arrayType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayLLVMType(nativeType.getType(), node.elements.length, ctx, `array<${nativeType.getType().toString()}>`);
+        const ptr_typ = nativeType.getType() as llvm.PointerType;
+        const arr_typ = ptr_typ.elementType as llvm.ArrayType; 
+        const arrayType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayLLVMType(arr_typ.elementType, node.elements.length, ctx, `array<${nativeType.getType().toString()}>`);
 
 	    console.log(`Array native type: ${arrayType.toString()}`);
 
@@ -35,10 +37,15 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
 	    // Store each element into the array
         ArrayLiteralExpressionCodeGenerator.storeIntoArray(node, ctx, builder, allocate);	
 
-        return new ArrayReference(
+        /*return new ArrayReference(
             nativeType.getType(),
             allocate,
-	    node.elements.length
+	        node.elements.length
+        );*/
+        return new ArrayReference(
+            arr_typ.elementType,
+            allocate,
+	        node.elements.length
         );
     }
 

@@ -3,10 +3,30 @@ import * as ts from 'typescript';
 import * as llvm from 'llvm-node';
 import {Context} from "./context";
 import {NativeType} from "./native-type";
+import UnsupportedError from "../error/unsupported.error"
 import {isJSRuntimeType, generate_runtime_struct_type} from "./code-generation/api/generate-llvm-type"
 import { TypeOfExpressionCodeGenerator } from './code-generation/typeof-expression';
+import { PassThrough } from 'stream';
+
+
 
 export class NativeTypeResolver {
+    static resolveArrayType(genericType: ts.GenericType, ctx: Context): NativeType {
+        let elementType = NativeTypeResolver.getType(genericType.typeArguments[0], ctx);
+        // Assume to be integer array
+        if (elementType.getType().isIntegerTy() || elementType.getType().isDoubleTy()) {
+            return new NativeType(llvm.PointerType.get(llvm.ArrayType.get(elementType.getType(), 100), 0));
+        }
+        // Assume to be an array of strings
+        else if (elementType.getType().isPointerTy()) {
+            //return new NativeType(llvm.ArrayType.get(elementType.getType(), 100));
+            return new NativeType(llvm.PointerType.get(llvm.ArrayType.get(elementType.getType(), 100), 0));
+        } else {
+            throw new Error("Unsupported Array Element Type");
+        }
+
+    }
+
     static getType(type: ts.Type, ctx: Context): NativeType|null {
         console.log("--Resolving Type Symbol: ");
         if (type.isNumberLiteral() || (<any>type).intrinsicName === 'number') {
@@ -20,10 +40,15 @@ export class NativeTypeResolver {
         /**
          * @todo Super hardcoded
          */
-        if (type.symbol && <string>type.symbol.escapedName === 'Array' && (<ts.GenericType>type).typeArguments) {
+        /*if (type.symbol && <string>type.symbol.escapedName === 'Array' && (<ts.GenericType>type).typeArguments) {
             const genericType = type as ts.GenericType;
             console.log("--Resolving Array Type--");
             return NativeTypeResolver.getType(genericType.typeArguments[0], ctx);
+        }*/
+        if (type.symbol && <string>type.symbol.escapedName === 'Array' && (<ts.GenericType>type).typeArguments) {
+            const genericType = type as ts.GenericType;
+            console.log("--Resolving Array Type--");
+            return NativeTypeResolver.resolveArrayType(genericType, ctx);
         }
 
         if (type.symbol && <string>type.symbol.escapedName == "RegExp") {

@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import * as llvm from 'llvm-node';
 import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
-import {Value} from "../value";
+import {Primitive, Value} from "../value";
 import UnsupportedError from "../../error";
 import {buildFromExpression, loadIfNeeded} from "../index";
 
@@ -42,10 +42,15 @@ export class PrefixUnaryExpressionCodeGenerator implements NodeGenerateInterface
 
                 return left;
             }
+            case ts.SyntaxKind.MinusToken: {
+                const left = buildFromExpression(node.operand, ctx, builder);
+                const minus_1 = llvm.ConstantFP.get(ctx.llvmContext, -1);
+                return new Primitive(builder.createFMul(left.getValue(), minus_1));
+            }
             default:
                 throw new UnsupportedError(
                     node,
-                    `Unsupported PostfixUnaryExpression.operator: "${node.operator}"`
+                    `Unsupported PrefixUnaryExpression.operator: "${node.operator}"`
                 );
         }
     }

@@ -17,7 +17,9 @@ let IngredientNames: Array<string> = [
 	"SpotifyTrackPlayListAdded_AlbumName",
 	"SpotifyTrackPlayListAdded_PlaylistName",
 	"GoogleDrive_anyNewPhoto_PhotoUrl",
-	"GoogleDrive_anyNewPhoto_Filename"];
+	"GoogleDrive_anyNewPhoto_Filename",
+	"Reddit_newHotPostInSubreddit_Title",
+	"GoogleCalendar_anyEventEnds_Title"];
 let IngredientTypes: Array<string> = [
 			"string", 
 			"string", 
@@ -25,6 +27,8 @@ let IngredientTypes: Array<string> = [
 			"string", 
 			"string", 
 			"string", 
+			"string",
+			"string",
 			"string",
 			"string",
 			"string",

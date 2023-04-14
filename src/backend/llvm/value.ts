@@ -12,6 +12,7 @@ export enum ValueTypeEnum {
     //
     UNKNOWN = 'UNKNOWN',
     OBJECT = 'OBJECT',
+    ARRAY = 'ARRAY',
     //
     INT8 = 'INT8',
     INT16 = 'INT16',
@@ -72,21 +73,21 @@ export class FunctionReference implements Value {
 
 export class ArrayReference implements Value {
     public elementType: llvm.Type;
-    public llvmValue: llvm.AllocaInst;
+    public llvmValue: llvm.Value;
     public numElements: number;
 
-    constructor(elementType: llvm.Type, llvmValue: llvm.AllocaInst, numElements: number) {
+    constructor(elementType: llvm.Type, llvmValue: llvm.Value, numElements: number) {
         this.elementType = elementType;
         this.llvmValue = llvmValue;
-	this.numElements = numElements;
+	    this.numElements = numElements;
     }
 
-    getValue(): llvm.AllocaInst {
+    getValue(): llvm.Value {
         return this.llvmValue;
     }
 
     getType(): ValueTypeEnum {
-        throw new Error('It is not a Primitive, it is ArrayReference (=ↀωↀ=)');
+        return ValueTypeEnum.ARRAY;
     }
 
     public toBoolean(ctx: Context, builder: llvm.IRBuilder, node: ts.Node): Value {
@@ -98,7 +99,7 @@ export class ArrayReference implements Value {
     }
 
     public getNumElements(): number {
-	return this.numElements;
+	    return this.numElements;
     }
 }
 

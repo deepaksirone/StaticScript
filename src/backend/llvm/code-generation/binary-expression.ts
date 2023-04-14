@@ -4,7 +4,7 @@ import * as llvm from 'llvm-node';
 import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
 import {NativeType} from "../native-type";
-import {Primitive, Value, ValueTypeEnum} from "../value";
+import {ArrayReference, Primitive, Value, ValueTypeEnum} from "../value";
 import UnsupportedError from "../../error/unsupported.error";
 import {buildFromExpression, loadIfNeeded} from "../index";
 
@@ -426,6 +426,16 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                             let res = builder.createICmpNE(call_expr, llvm.ConstantInt.get(ctx.llvmContext, 0, 32));
                             return new Primitive(res, ValueTypeEnum.BOOLEAN);
                         }
+                    }
+
+                    case ValueTypeEnum.ARRAY: {
+                        //Have an array comparison function here
+                        //TODO: More sophisticated Array Comparison, just pointer to int conversion now
+                        let l = builder.createPtrToInt(left.getValue(), llvm.Type.getInt64Ty(ctx.llvmContext));
+                        let r = builder.createPtrToInt(right.getValue(), llvm.Type.getInt64Ty(ctx.llvmContext));
+                        let res = builder.createICmpNE(l, r);
+                        return new Primitive(res, ValueTypeEnum.BOOLEAN);
+
                     }
 
                     default:

@@ -122,7 +122,7 @@ function buildFromNullExpr(value: ts.NullLiteral,
     builder: llvm.IRBuilder): Value {
         return new Primitive(
             llvm.ConstantPointerNull.get(llvm.Type.getInt8PtrTy(ctx.llvmContext)),
-            ValueTypeEnum.STRING
+            ValueTypeEnum.ARRAY
         );
 }
 
@@ -498,6 +498,7 @@ function generateAssignment(block: ts.VariableDeclaration, rhs: Value, ctx: Cont
         
 		default:
 			// regular load and store
+            console.log("Default case in load instruction");
 			const rhsVar = builder.createLoad(rhs.getValue());
 			value = builder.createAlloca(
                                         rhsVar.type,
@@ -519,8 +520,8 @@ function generateAssignment(block: ts.VariableDeclaration, rhs: Value, ctx: Cont
 
 export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Context, builder: llvm.IRBuilder) {
     if (block.initializer && block.name.kind == ts.SyntaxKind.Identifier) {
-	const typ = ctx.typeChecker.getTypeFromTypeNode(block.type);
-	console.log(`var name: ${<string>block.name.escapedText}, type: ${ts.TypeFlags[typ.flags]}, isString: ${typ.isStringLiteral()}, insname: ${(<any>typ).intrinsicName}`);
+	    const typ = ctx.typeChecker.getTypeFromTypeNode(block.type);
+	    console.log(`var name: ${<string>block.name.escapedText}, type: ${ts.TypeFlags[typ.flags]}, isString: ${typ.isStringLiteral()}, insname: ${(<any>typ).intrinsicName}`);
         const nativeTypeForDefaultValue = NativeTypeResolver.getType(
             ctx.typeChecker.getTypeFromTypeNode(block.type),
             ctx
@@ -528,7 +529,7 @@ export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Cont
 
         const defaultValue = buildFromExpression(block.initializer, ctx, builder, nativeTypeForDefaultValue);
         if (defaultValue instanceof Primitive) {
-	    console.log(`Type of alloca var: ${defaultValue.getValue().type.toString()}`);
+	        console.log(`Type of alloca var Primitive: ${defaultValue.getValue().type.toString()}`);
             /*const value = builder.createAlloca(
                 defaultValue.getValue().type,
                 undefined,
@@ -553,6 +554,8 @@ export function passVariableDeclaration(block: ts.VariableDeclaration, ctx: Cont
 
             ctx.scope.variables.set(<string>block.name.escapedText, new ObjectReference(class_ref, call_inst));
         } else {
+            // Handling the case where the array var is of type ArrayReference
+            console.log(`Type of Array/ObjectVar var: ${defaultValue.getValue().type.toString()}`);
             ctx.scope.variables.set(<string>block.name.escapedText, defaultValue);
         }
 

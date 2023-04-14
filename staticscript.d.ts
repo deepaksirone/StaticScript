@@ -30,7 +30,9 @@ interface Number {
 
 interface Object {}
 
-interface RegExp {}
+interface RegExp {
+	test(s: string): boolean;
+}
 
 interface String {
 	concat(s: string): string;
@@ -39,6 +41,8 @@ interface String {
 	indexOf(s: string): number;
 	split(s: string): Array<string>;
 	trim(): string;
+	charAt(n: number): string;
+	slice(start: number, end: number): string;
 	length: number;
 	match(s: string): Array<string>;
 	match(r: RegExp): Array<string>;
@@ -49,6 +53,7 @@ interface Array<T> {
 	length: number;
 	join(s: string): string;
 	toString(): string;
+	indexOf(s: number): number;
 	slice(start: number, end: number): Array<string>;
 }
 
@@ -60,6 +65,7 @@ declare function parseFloat(str: string): number;
 declare function parseFloat(s: number): number;
 declare function String(n: number): string;
 declare function Number(): number;
+declare function RegExp(s: string): RegExp;
 
 declare class Action {
 	skip(): void;
@@ -81,6 +87,7 @@ declare function moment(s: string, format: string): MomentJS;
 
 declare class Date {
 	constructor();
+	constructor(d: Date);
 }
 
 declare class TriggerData {
@@ -108,8 +115,13 @@ declare class addDetailedEventObj {
 	setEndTime(endtime: string);
 }
 
+declare class eventEndsObj {
+	Title: string;
+}
+
 declare class GoogleCalendar {
 	static addDetailedEvent: addDetailedEventObj;
+	static anyEventEnds: eventEndsObj;
 }
 
 declare class LutronCasetaWireless {
@@ -132,6 +144,7 @@ declare class NestThermostat {
 declare class Hue {
 	static setColorAllHue: Action;
 	static turnOnAllHue: Action;
+	static toggleAllHue: Action;
 }
 
 declare class IfNotifications {
@@ -155,8 +168,15 @@ declare class SpotifyTrackPlayListAdded {
 	PlaylistName: string;
 }
 
+declare class AddTrackToPlaylist {
+	setSearchQuery(s: string);
+	setArtistName(s: string);
+	skip();
+}
+
 declare class Spotify {
 	static newTrackAddedToPlaylist: SpotifyTrackPlayListAdded;
+	static addATrackToAPlaylist: AddTrackToPlaylist;
 }
 
 declare class Gmail {
@@ -229,4 +249,22 @@ declare class TumblrPhotoPost {
 
 declare class Tumblr {
 	static createPhotoPost: TumblrPhotoPost;
+}
+
+declare class WemoSwitch {
+	static attributeSocketOnDiscrete: Action;
+}
+
+
+declare class RedditPost {
+	Title: string;
+}
+
+declare class Reddit {
+	static newHotPostInSubreddit: RedditPost;
+	static submitLinkReddit: Action;
+}
+
+declare class Yeelight {
+	static setScene: Action;
 }

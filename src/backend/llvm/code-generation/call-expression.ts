@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import * as llvm from 'llvm-node';
 import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
-import {Primitive, Value, ValueTypeEnum, convertLLVMTypeToValueType} from "../value";
+import {Primitive, Value, ValueTypeEnum, convertLLVMTypeToValueType, ArrayReference} from "../value";
 import {NativeType} from "../native-type";
 import UnsupportedError from "../../error";
 import {buildCalleFromCallExpression, buildFromExpression, loadIfNeeded} from "../index";
@@ -23,6 +23,18 @@ export function getFullnameFromCallExpression(node: ts.Expression): string {
         }
 
         return '';
+}
+
+function getValueClass(fn: [llvm.CallInst, NativeType]): Value {
+    if (fn[1].getType() instanceof llvm.PointerType) {
+        let typ = fn[1].getType() as llvm.PointerType;
+        if (typ.elementType instanceof llvm.ArrayType) {
+            let arr_typ = typ.elementType as llvm.ArrayType;
+            return new ArrayReference(arr_typ.elementType, fn[0], arr_typ.numElements);
+        }
+    }
+
+    return new Primitive(fn[0]);
 }
 
 export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.CallExpression, Value> {
@@ -50,7 +62,8 @@ export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.Cal
                     let api_struct = buildFromExpression(node.expression, ctx, builder);
                     let call_expr = generateAPIFunctionCall(parent_class, method_name, api_struct, node, ctx, builder);
                     console.log("Generated call expression for method call");
-                    return new Primitive(call_expr);
+
+                    return getValueClass(call_expr);
                 }
 
 				let fullName = getFullnameFromCallExpression(node);
@@ -76,11 +89,13 @@ export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.Cal
             );
         }
 
+        console.log("[DEBUG] Here1");
         const args = node.arguments.map((expr) => {
             return loadIfNeeded(
                 buildFromExpression(<any>expr, ctx, builder), builder
             );
         });
+        console.log("[DEBUG] Here2");
 
 	const fntype = (callle.type as llvm.PointerType).elementType;
 	const valEnum = convertLLVMTypeToValueType(fntype);
