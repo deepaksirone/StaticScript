@@ -19,6 +19,10 @@ export function generate_runtime_struct_type(type: string, ctx: Context): llvm.T
         case "String" : {
             return llvm.Type.getInt8PtrTy(ctx.llvmContext);
         }
+        //FIXME: Hardcoding this to be only arrays of strings
+        case "Array": {
+            return llvm.ArrayType.get(llvm.Type.getInt8PtrTy(ctx.llvmContext), 100);
+        }
         default: 
             throw new Error(
                 `Unsupported type, "${type}"`

@@ -47,6 +47,10 @@ export class PrefixUnaryExpressionCodeGenerator implements NodeGenerateInterface
                 const minus_1 = llvm.ConstantFP.get(ctx.llvmContext, -1);
                 return new Primitive(builder.createFMul(left.getValue(), minus_1));
             }
+            case ts.SyntaxKind.PlusToken : { 
+                const left = buildFromExpression(node.operand, ctx, builder);
+                return new Primitive(left.getValue());
+            }
             default:
                 throw new UnsupportedError(
                     node,

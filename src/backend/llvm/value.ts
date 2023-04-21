@@ -27,7 +27,15 @@ export function convertLLVMTypeToValueType(type: llvm.Type) {
             return ValueTypeEnum.DOUBLE;
 	case llvm.Type.TypeID.PointerTyID: {
 	    console.log("[convertLLVMTypeToValueType] Returning string type");
-	    return ValueTypeEnum.STRING;
+        let typ = type as llvm.PointerType;
+        if (typ.elementType instanceof llvm.ArrayType) {
+	        return ValueTypeEnum.ARRAY;
+        } else if (typ.elementType instanceof llvm.IntegerType) {
+            return ValueTypeEnum.STRING;
+        } else {
+            // Runtime API structs
+            return ValueTypeEnum.OBJECT;
+        }
 	}
 	case llvm.Type.TypeID.FunctionTyID: {
 	    const fnType = type as llvm.FunctionType;

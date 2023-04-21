@@ -19,7 +19,11 @@ let IngredientNames: Array<string> = [
 	"GoogleDrive_anyNewPhoto_PhotoUrl",
 	"GoogleDrive_anyNewPhoto_Filename",
 	"Reddit_newHotPostInSubreddit_Title",
-	"GoogleCalendar_anyEventEnds_Title"];
+	"GoogleCalendar_anyEventEnds_Title",
+	"Youtube_newPublicVideoFromSubscriptions_Title",
+	"Twitter_newTweetByUser_CreatedAt",
+	"Twitter_newTweetByUser_Text",
+	"Netro_sensorData_Moisture"];
 let IngredientTypes: Array<string> = [
 			"string", 
 			"string", 
@@ -27,6 +31,10 @@ let IngredientTypes: Array<string> = [
 			"string", 
 			"string", 
 			"string", 
+			"string",
+			"string",
+			"string",
+			"string",
 			"string",
 			"string",
 			"string",

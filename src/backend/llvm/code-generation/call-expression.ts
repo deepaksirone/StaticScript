@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import * as llvm from 'llvm-node';
 import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
-import {Primitive, Value, ValueTypeEnum, convertLLVMTypeToValueType, ArrayReference} from "../value";
+import {Primitive, Value, ValueTypeEnum, convertLLVMTypeToValueType, ArrayReference, ObjectReference} from "../value";
 import {NativeType} from "../native-type";
 import UnsupportedError from "../../error";
 import {buildCalleFromCallExpression, buildFromExpression, loadIfNeeded} from "../index";
@@ -32,6 +32,8 @@ function getValueClass(fn: [llvm.CallInst, NativeType]): Value {
             let arr_typ = typ.elementType as llvm.ArrayType;
             return new ArrayReference(arr_typ.elementType, fn[0], arr_typ.numElements);
         }
+
+
     }
 
     return new Primitive(fn[0]);
@@ -45,7 +47,7 @@ export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.Cal
     
 	var callle = null;
 	if (signature) {
-        console.log(signature);
+        //console.log(signature);
 		switch ((<ts.SignatureDeclaration>signature.declaration).kind) {
             case ts.SyntaxKind.MethodSignature:
 			case ts.SyntaxKind.MethodDeclaration: {

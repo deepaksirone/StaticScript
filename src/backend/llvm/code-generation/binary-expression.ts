@@ -135,6 +135,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                 if (left.getType() != right.getType()) {
                     console.log("LHS Type: " + left.getType());
                     console.log("RHS Type: " + right.getType());
+                    
                     //TODO: Handle Type conversions
                     throw new UnsupportedError (node, "Type conversions unsupported");
                 } else {
@@ -394,6 +395,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
 
         }
 
+        case ts.SyntaxKind.ExclamationEqualsEqualsToken:
         case ts.SyntaxKind.ExclamationEqualsToken: {
             const left = buildFromExpression(node.left, ctx, builder);
 		    const right = buildFromExpression(node.right, ctx, builder);

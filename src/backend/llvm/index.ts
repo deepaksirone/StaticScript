@@ -646,9 +646,14 @@ export function passStatement(stmt: ts.Statement, ctx: Context, builder: llvm.IR
 export function loadIfNeeded(value: Value, builder: llvm.IRBuilder): llvm.Value {
     // Hacky Styff: global string is of type i8, other string pointer values are i8**
     if (value.getValue().type.isPointerTy() && !(value.getValue().type.toString() === "i8*")) {
-        return builder.createLoad(value.getValue());
+        console.log(`[DEBUG] Value Type: ${value.getValue().type.toString()}`)
+        let val_typ = value.getValue().type as llvm.PointerType;
+        if (!val_typ.elementType.isArrayTy() && !val_typ.elementType.isStructTy()) {
+            return builder.createLoad(value.getValue());
+        }
     }
-
+    
+    
     return value.getValue();
 }
 

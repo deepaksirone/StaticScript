@@ -8,19 +8,48 @@ import {Primitive, ArrayReference, Value, ValueTypeEnum, convertLLVMTypeToValueT
 import UnsupportedError from "../../error";
 import {IsRuleIngredient} from "./rule-ingredient"
 import {buildFromExpression, loadIfNeeded} from "../index";
+import {LANGUAGE_DEFINITION_FILE} from "../../../constants"
 
-function getFullnameFromProperty(node: ts.Expression): string {
+function getFullnameFromProperty(node: ts.Expression, ctx: Context): [string, string] {
 	switch (node.kind) {
-		case ts.SyntaxKind.PropertyAccessExpression:
-			return getFullnameFromProperty((<ts.PropertyAccessExpression>node).expression) + '_' + <string>(<ts.PropertyAccessExpression>node).name.escapedText;
-		case ts.SyntaxKind.Identifier:
-			return <string>((<ts.Identifier>node).escapedText);
+		case ts.SyntaxKind.PropertyAccessExpression: {
+			let ret = getFullnameFromProperty((<ts.PropertyAccessExpression>node).expression, ctx);
+			return [ret[0] + '_' + <string>(<ts.PropertyAccessExpression>node).name.escapedText, ret[1]];
+		}
+		case ts.SyntaxKind.Identifier: {
+			let typ = ctx.typeChecker.getTypeAtLocation(node);
+			
+			//console.log("The source file : " + typ.symbol.getDeclarations()[0].getSourceFile().fileName);
+			if (typ.symbol) {
+				return [<string>((<ts.Identifier>node).escapedText), typ.symbol.getDeclarations()[0].getSourceFile().fileName];
+			} else {
+				return [<string>((<ts.Identifier>node).escapedText), undefined];
+			}
+		}
 		default:
 			console.log(`[getFullnameFromProperty] Returning empty string for type: ${ts.SyntaxKind[node.kind]}`);
-			return ""
+			return ["", ""]
 	}
 
-	return '';
+	return ['', ""];
+}
+
+function resolveLLVMType(type: string, ctx: llvm.LLVMContext): llvm.Type {
+
+	switch (type) {
+		case "string": {
+			let stringPtrType = llvm.Type.getInt8PtrTy(ctx);
+			return stringPtrType;
+		}
+		case "integer": {
+			let doublePtrType = llvm.Type.getDoubleTy(ctx);
+			return doublePtrType;
+		}
+		default: {
+                        let doublePtrType = llvm.Type.getDoubleTy(ctx);
+                        return doublePtrType;
+                }
+	}
 }
 
 function isJSProperty(node: ts.PropertyAccessExpression): boolean {
@@ -36,10 +65,53 @@ function isJSProperty(node: ts.PropertyAccessExpression): boolean {
 export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterface<ts.PropertyAccessExpression, Value> {
     generate(node: ts.PropertyAccessExpression, ctx: Context, builder: llvm.IRBuilder, nativeType?: NativeType): Value {
 	// Check if the property is an ingredient:
-	let fullFnName = getFullnameFromProperty(node);
-	console.log(`[PropertyAccessExpressionCodeGenerator] The full name: ${fullFnName}`)
-	let isRuleIngredientTuple = IsRuleIngredient(fullFnName, ctx.llvmContext);
-	if (isRuleIngredientTuple[0]) {
+	let fullFnName = getFullnameFromProperty(node, ctx);
+	let typ = ctx.typeChecker.getTypeAtLocation(node);
+	console.log("The type of property: " + (<any>typ).intrinsicName);
+	
+	//console.log(typ.symbol.getDeclarations())
+	
+	console.log(`[PropertyAccessExpressionCodeGenerator] The full name: ${fullFnName[0]}`)
+	let isRuleIngredientTuple = IsRuleIngredient(fullFnName[0], ctx.llvmContext);
+	if (fullFnName[1] == LANGUAGE_DEFINITION_FILE) {
+		console.log(`[PropertyAccessExpressionCodeGenerator] Parent class in lang def file`)
+		if (ctx.apiFunction.has(fullFnName[0])) {
+			let fn = ctx.apiFunction.get(fullFnName[0]);
+			let returnTy = resolveLLVMType((<any>typ).intrinsicName, ctx.llvmContext);
+			let fnType = llvm.FunctionType.get(
+				returnTy,
+				[],
+				false
+			);
+			const valEnum = convertLLVMTypeToValueType(fnType);
+			return new Primitive(
+					   builder.createCall(
+						fn,
+						[],
+						 ), valEnum 
+			   );
+		}
+		let returnTy = resolveLLVMType((<any>typ).intrinsicName, ctx.llvmContext);
+		let fnType = llvm.FunctionType.get(
+			returnTy,
+		[],
+		false);
+		let fn = llvm.Function.create(
+			fnType,
+			llvm.LinkageTypes.ExternalLinkage,
+			fullFnName[0],
+			ctx.llvmModule);
+			ctx.apiFunction.set(fullFnName[0], fn);
+	//TODO: Return call with correct ValueTypeEnum for the function type
+		const valEnum = convertLLVMTypeToValueType(fnType);
+		return new Primitive(
+					   builder.createCall(
+						fn,
+						[],
+						 ), valEnum 
+		);
+	}
+	else if (isRuleIngredientTuple[0]) {
 		//console.log("Fixing up ingredient ConditionImageURL");
 		console.log(`The fullname: ${fullFnName}`);
 		//TODO: Generate code for function call to ConditionImageURL
@@ -52,7 +124,7 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 		let fn = llvm.Function.create(
         		fnType,
         		llvm.LinkageTypes.ExternalLinkage,
-        		fullFnName,
+        		fullFnName[0],
         		ctx.llvmModule);
 		//TODO: Return call with correct ValueTypeEnum for the function type
                 const valEnum = convertLLVMTypeToValueType(fnType);
@@ -102,6 +174,8 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 
 		}
 	}
+
+		//const parent_class = getParentClass()
         const object = buildFromExpression(node.expression, ctx, builder);
         if (object) {
             return object;

@@ -61,7 +61,9 @@ export class NativeTypeResolver {
         
         if (type.symbol) {
             if (isJSRuntimeType(<string>type.symbol.escapedName)) {
-                return new NativeType(generate_runtime_struct_type(<string>type.symbol.escapedName, ctx));
+                //TODO: Fix this, assumes that all structs come from function call results
+                //FIXME: Runtime Structs need not be pointers in the code
+                return new NativeType(llvm.PointerType.get(generate_runtime_struct_type(<string>type.symbol.escapedName, ctx), 0));
             }
         }
 

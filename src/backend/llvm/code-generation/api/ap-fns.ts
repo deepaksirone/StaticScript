@@ -65,6 +65,27 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 case "charAt": {
                     return true;
                 }
+                case "toUpperCase": {
+                    return true;
+                }
+                case "split": {
+                    return true;
+                }
+                case "slice": {
+                    return true;
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
+
+        case "Array": {
+            switch (method_name) {
+                case "toString": {
+                    return true;
+                }
+
                 default: {
                     return false;
                 }
@@ -105,7 +126,15 @@ function declareAPIFunction(class_name: string, method_name: string, method_call
         );
     });
 
-    let params = [generate_runtime_struct_type(class_name, ctx)];
+    //FIXME: Extremely hacky, use this to have the pointer of the runtime struct as the parameter
+    let runtime_param = generate_runtime_struct_type(class_name, ctx);
+    let params = [];
+    if (runtime_param instanceof llvm.StructType || runtime_param instanceof llvm.ArrayType) {
+        params = [llvm.PointerType.get(runtime_param, 0)];
+    } else {
+        params = [runtime_param];
+    }
+
     params.push(..._params);
 
     let fn_type = llvm.FunctionType.get(return_type.getType(), params, false);

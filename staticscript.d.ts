@@ -24,7 +24,7 @@ interface IArguments {}
 
 interface Number {
 	toString(): string;
-	toFixed(n: number): number;
+	toFixed(n: number): string;
 	constructor(): number;
 }
 
@@ -37,6 +37,7 @@ interface RegExp {
 interface String {
 	concat(s: string): string;
 	replace(s: RegExp, t: string): string;
+	replace(s: string, t: string): string;
 	constructor(f: number): string;
 	indexOf(s: string): number;
 	split(s: string): Array<string>;
@@ -46,7 +47,11 @@ interface String {
 	length: number;
 	match(s: string): Array<string>;
 	match(r: RegExp): Array<string>;
-	
+	toUpperCase(): string;
+	toLowerCase(): string;
+	substr(start: number, end: number): string;
+	search(t: RegExp): number;
+	search(s: string): number;
 }
 
 interface Array<T> {
@@ -61,15 +66,20 @@ declare function puts(str: string): void;
 
 
 declare function parseInt(str: string): number;
+declare function parseInt(str:string, base: number): number;
 declare function parseFloat(str: string): number;
 declare function parseFloat(s: number): number;
 declare function String(n: number): string;
 declare function Number(): number;
+declare function Number(s: string): number;
 declare function RegExp(s: string): RegExp;
 
 declare class Action {
 	skip(): void;
 	skip(s: string): void;
+	setMessage(s: string);
+	setIssueTitle(s: string);
+	setIssueBody(s: string);
 }
 
 declare class MomentJS {
@@ -88,6 +98,8 @@ declare function moment(s: string, format: string): MomentJS;
 declare class Date {
 	constructor();
 	constructor(d: Date);
+	constructor(s: string);
+	getDay(): number;
 }
 
 declare class TriggerData {
@@ -98,8 +110,14 @@ declare class Smartthings {
 	static turnOnSmartthings: Action;
 }
 
+declare class currentWeather {
+	HighTempCelsius: number;
+}
+
 declare class Weather {
 	static tomorrowsForecastCallsFor: TriggerData;
+	static currentWeatherAtTime: currentWeather;
+
 }
 
 declare class placeAPhoneCallObj {
@@ -113,6 +131,8 @@ declare class AndroidPhone {
 
 declare class addDetailedEventObj {
 	setEndTime(endtime: string);
+	setStartTime(s: string);
+	setDescription(s: string);
 }
 
 declare class eventEndsObj {
@@ -137,12 +157,25 @@ declare class Buffer {
 	static addToBufferWithPhoto: BufferPhoto;
 }
 
+declare class awayFromHomeObj {
+	HomeName: string;
+	SetAt: string;
+}
+
 declare class NestThermostat {
 	static setTemperature: Action;
+	static awayFromHome: awayFromHomeObj;
+}
+
+declare class HueColor {
+	skip(s: string);
+	skip();
+	setColor(s: string);
 }
 
 declare class Hue {
-	static setColorAllHue: Action;
+	static setColorAllHue: HueColor;
+	static setScene: Action;
 	static turnOnAllHue: Action;
 	static toggleAllHue: Action;
 }
@@ -171,7 +204,9 @@ declare class SpotifyTrackPlayListAdded {
 declare class AddTrackToPlaylist {
 	setSearchQuery(s: string);
 	setArtistName(s: string);
+	setPlaylist(s: string);
 	skip();
+	skip(s: string);
 }
 
 declare class Spotify {
@@ -187,21 +222,28 @@ declare class Trigger {
 	static LinkToProfile: string;
 	static EntryTitle: string;
 	static Text: string;
+	static DeviceName: string;
 }
 
 declare class Tweet {
 	setTweet(s: string);
 	skip();
+	skip(s: string);
+	CreatedAt: string;
+	Text: string;
+
 }
 
 declare class newTweetWithImage {
 	setTweet(s: string);
 	setPhotoUrl(s: string);
+	skip();
 }
 
 declare class Twitter {
 	static postNewTweet: Tweet;
 	static postNewTweetWithImage: newTweetWithImage;
+	static newTweetByUser: Tweet;
 }
 
 declare class FeedEntry {
@@ -216,8 +258,15 @@ declare class Telegram {
 	static sendMessage: Action;
 }
 
+declare class EvernoteNote {
+	skip();
+	skip(s: string);
+	setTitle(s: string);
+
+}
+
 declare class Evernote {
-	static appendToNote: Action;
+	static appendToNote: EvernoteNote;
 }
 
 declare class GooglePhoto {
@@ -267,4 +316,241 @@ declare class Reddit {
 
 declare class Yeelight {
 	static setScene: Action;
+	static onOff: YeelightOnOff;
+}
+
+declare class VideoDesc {
+	Title: string;
+}
+
+declare class Youtube {
+	static newPublicVideoFromSubscriptions: VideoDesc;
+}
+
+declare class sensData {
+	Moisture: string;
+}
+
+declare class Netro {
+	static sensorData: sensData;
+	static noWater: Action;
+	static reportWeather: WeatherObj;
+}
+
+declare class alertTime {
+	AlertTime: string;
+}
+
+declare class AmazonAlexa {
+	static alarmFired: alertTime;
+}
+
+declare class callDevice {
+	setMessage(s: string);
+	skip(s: string);
+}
+
+declare class VoipCalls {
+	static callMyDevice: callDevice;
+}
+
+declare class InstagramVideo {
+	Caption: string;
+}
+
+declare class InstagramPhoto {
+	CreatedAt: string;
+}
+
+declare class Instagram {
+	static anyNewVideoByYouInstagram: InstagramVideo;
+	static anyNewPhotoByYou: InstagramPhoto;
+}
+
+declare class PhotoPage {
+	skip();
+}
+
+declare class FacebookPages {
+	static createPhotoPage: PhotoPage;
+}
+
+
+declare class createFeedly {
+	skip(s: string);
+}
+declare class Feedly { 
+	static createNewEntryFeedly: createFeedly;
+}
+
+declare class RoosterTransfer {
+	setAmount(s: string);
+}
+
+declare class RoosterCardSpend {
+	SpendAmountDecimal: string;
+}
+
+declare class Roostermoney {
+	static cardSpend: RoosterCardSpend;
+	static transfer: RoosterTransfer; 
+}
+
+declare class WemoStatus {
+	SwitchName: string;
+	SwitchedOffAt: string;
+}
+
+declare class WemoInsightSwitch {
+	static attributeINSIGHTOFFN: WemoStatus;
+}
+
+declare class GoogleSpreadSheet {
+	setFormattedRow(s: string);
+}
+
+declare class GoogleSheetRow {
+	ColumnA: string;
+	ColumnB: string;
+	ColumnC: string;
+}
+
+declare class GoogleSheets {
+	static appendToGoogleSpreadsheet: GoogleSpreadSheet;
+	static newRowInSpreadsheet: GoogleSheetRow;
+}
+
+declare class UploadBox {
+	skip(s: string);
+}
+
+declare class Box {
+	static uploadFileFromUrlBox: UploadBox;
+}
+
+declare class deviceVolume {
+	skip(s: string);
+}
+
+declare class AndroidDevice {
+	static setDeviceVolume: deviceVolume;
+}
+
+declare class AndroidMessages {
+	static sendAMessage: Action;
+}
+
+declare class photoPost {
+	setTitle(s: string);
+}
+
+declare class Wordpress {
+	static createPhotoPostWp: photoPost;
+}
+
+declare class lightOn {
+	skip();
+}
+
+declare class HiveActiveLight {
+	static setLightOn: lightOn;
+}
+
+declare class DCUTransaction {
+	Amount: string;
+	TransactionDetail: string;
+}
+
+declare class DCUPlaidIFTTT {
+	static newTransactions: DCUTransaction;
+}
+
+declare class smsMessage {
+	setMessage(s: string);
+	skip();
+}
+
+declare class Sms {
+	static sendMeText: smsMessage;
+}
+
+declare class collarInfoClass {
+	CreatedAt: string;
+	Battery: string;
+}
+
+declare class LinkMyPet {
+	static collarInfo: collarInfoClass;
+}
+
+declare class YeelightOnOff {
+	setOnOffOption(s: string);
+	skip(s: string);
+}
+
+declare class MonzoPotDeposit {
+	setAmount(s: string);
+}
+
+declare class MonzoCardPurchase {
+	Category: string;
+}
+
+declare class Monzo {
+	static potDeposit: MonzoPotDeposit;
+	static cardPurchase: MonzoCardPurchase;
+}
+
+declare class StripeNewTransfer {
+	Amount: string;
+}
+
+declare class Stripe {
+	static newTransfer: StripeNewTransfer;
+}
+
+declare class MadeDonationObj {
+	skip();
+}
+
+declare class MakeItDonate {
+	static makeADonation: MadeDonationObj;
+}
+
+declare class EwelinkAction {
+	skip();
+}
+
+declare class Ewelink {
+	static switchAction: EwelinkAction;
+}
+
+declare class dataFromTheBea {
+	EntryTitle: string;
+}
+
+declare class Bea {
+	static newDataFromTheBea: dataFromTheBea;
+}
+
+declare class Github {
+	static createNewIssueForRepository: Action;
+}
+
+declare class PhoneCall {
+	static callMyPhone: Action;
+}
+
+declare class TriggerWithOneTextObj {
+	TextField: string;
+}
+
+declare class GoogleAssistant {
+	static voiceTriggerWithOneTextIngredient: TriggerWithOneTextObj;
+}
+
+declare class WeatherObj {
+	setDate(s: string);
+	setRain(s: string);
+	setRainProb(s: string);
 }
