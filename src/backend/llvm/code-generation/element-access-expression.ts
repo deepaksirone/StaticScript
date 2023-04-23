@@ -18,10 +18,13 @@ export class ElementAccessExpressionGenerator implements NodeGenerateInterface<t
 	const siArrIdx1 = builder.createFPToSI(loadIfNeeded(arrIdx1, builder), llvm.Type.getInt32Ty(ctx.llvmContext));
 	//const siArrIdx1 = loadIfNeeded(new Primitive(cast), builder);
 	const arrIdx2 = llvm.ConstantInt.get(ctx.llvmContext, 0, 32);
-	const idxArray : Array<llvm.Value> = [arrIdx2, siArrIdx1];
+	//const idxArray : Array<llvm.Value> = [arrIdx2, siArrIdx1];
+	const idxArray : Array<llvm.Value> = [siArrIdx1];
 	console.log("[DEBUG] here2")
 	
-	const elemPtr = builder.createInBoundsGEP(array.getValue(), idxArray);
+	const pointer = builder.createBitCast(array.getValue(), llvm.PointerType.get(array.elementType, 0));
+	const elemPtr = builder.createInBoundsGEP(pointer, idxArray);
+	//const elemPtr = builder.createInBoundsGEP(array.getValue(), idxArray);
 	//const elemPtr = builder.createExtractValue(array.getValue(), []);
 	console.log("[DEBUG] here3")
 	const elem = builder.createLoad(elemPtr);
