@@ -32,6 +32,7 @@ interface Object {}
 
 interface RegExp {
 	test(s: string): boolean;
+	exec(s: string): Array<string>;
 }
 
 interface String {
@@ -73,6 +74,7 @@ declare function String(n: number): string;
 declare function Number(): number;
 declare function Number(s: string): number;
 declare function RegExp(s: string): RegExp;
+declare function RegExp(r: RegExp): RegExp;
 
 declare class Action {
 	skip(): void;
@@ -88,6 +90,8 @@ declare class MomentJS {
 	toString(): string;
 	day(): number;
 	hour(): number;
+	hour(n: number): MomentJS;
+	minute(n: number): MomentJS;
 	constructor();
 	constructor(s: string);
 }
@@ -112,11 +116,13 @@ declare class Smartthings {
 
 declare class currentWeather {
 	HighTempCelsius: number;
+	Condition: string;
 }
 
 declare class Weather {
 	static tomorrowsForecastCallsFor: TriggerData;
 	static currentWeatherAtTime: currentWeather;
+	static currentConditionIs: currentWeather;
 
 }
 
@@ -182,14 +188,21 @@ declare class Hue {
 
 declare class IfNotifications {
 	static sendNotification: Action;
+	static sendRichNotification: Action;
 }
 
 declare class Skybell {
 	static record60sOfVideo: Action;
 }
 
+declare class sendMeEmailObj {
+	skip();
+	setSubject(s: string);
+	setBody(s: string);
+}
+
 declare class Email {
-	static sendMeEmail: Action;
+	static sendMeEmail: sendMeEmailObj;
 }
 
 declare class SpotifyTrackPlayListAdded {
@@ -215,7 +228,7 @@ declare class Spotify {
 }
 
 declare class Gmail {
-
+	static sendAnEmail: Action;
 }
 
 declare class Trigger {
@@ -223,6 +236,9 @@ declare class Trigger {
 	static EntryTitle: string;
 	static Text: string;
 	static DeviceName: string;
+	static Title: string;
+	static CreatedAt: string;
+	static Description: string;
 }
 
 declare class Tweet {
@@ -231,6 +247,7 @@ declare class Tweet {
 	skip(s: string);
 	CreatedAt: string;
 	Text: string;
+	LinkToTweet: string;
 
 }
 
@@ -244,6 +261,7 @@ declare class Twitter {
 	static postNewTweet: Tweet;
 	static postNewTweetWithImage: newTweetWithImage;
 	static newTweetByUser: Tweet;
+	static newTweetFromSearch: Tweet;
 }
 
 declare class FeedEntry {
@@ -254,8 +272,16 @@ declare class Feed {
 	static newFeedItem: FeedEntry;
 }
 
+declare class sendMsgObj {
+	skip(): void;
+	skip(s: string): void;
+	setText(s: string);
+	setIncludeWebPagePreview(s: string);
+}
+
 declare class Telegram {
-	static sendMessage: Action;
+	static sendMessage: sendMsgObj;
+
 }
 
 declare class EvernoteNote {
@@ -294,6 +320,7 @@ declare class TumblrPhotoPost {
 	setSourceUrl(s: string);
 	setCaption(s: string);
 	setTags(s: string);
+	skip();
 }
 
 declare class Tumblr {
@@ -302,6 +329,7 @@ declare class Tumblr {
 
 declare class WemoSwitch {
 	static attributeSocketOnDiscrete: Action;
+	static attributeSocketOffDiscrete: Action;
 }
 
 
@@ -371,8 +399,14 @@ declare class PhotoPage {
 	skip();
 }
 
+declare class StatusMessage {
+	Message: string;
+	PageUrl: string;
+}
+
 declare class FacebookPages {
 	static createPhotoPage: PhotoPage;
+	static newStatusMessageByPage: StatusMessage;
 }
 
 
@@ -403,10 +437,12 @@ declare class WemoStatus {
 
 declare class WemoInsightSwitch {
 	static attributeINSIGHTOFFN: WemoStatus;
+	static attributeInsightOnDiscrete: Action;
 }
 
 declare class GoogleSpreadSheet {
 	setFormattedRow(s: string);
+	skip();
 }
 
 declare class GoogleSheetRow {
@@ -432,8 +468,14 @@ declare class deviceVolume {
 	skip(s: string);
 }
 
+declare class androidBluetooth {
+	DeviceName: string;
+}
+
 declare class AndroidDevice {
 	static setDeviceVolume: deviceVolume;
+	static bluetoothConnected: androidBluetooth;
+	static playBestSong: Action;
 }
 
 declare class AndroidMessages {
@@ -494,11 +536,21 @@ declare class MonzoPotDeposit {
 
 declare class MonzoCardPurchase {
 	Category: string;
+	MerchantName: string;
+	AccountCurrencyCode: string;
+	LocalCurrencyCode: string;
+	AmountInAccountCurrency: string;
+}
+
+declare class MonzoPotWithdraw {
+	skip();
+	setAmount(s: string);
 }
 
 declare class Monzo {
 	static potDeposit: MonzoPotDeposit;
 	static cardPurchase: MonzoCardPurchase;
+	static potWithdraw: MonzoPotWithdraw;
 }
 
 declare class StripeNewTransfer {
@@ -523,6 +575,7 @@ declare class EwelinkAction {
 
 declare class Ewelink {
 	static switchAction: EwelinkAction;
+	static plugAction: EwelinkAction;
 }
 
 declare class dataFromTheBea {
@@ -553,4 +606,59 @@ declare class WeatherObj {
 	setDate(s: string);
 	setRain(s: string);
 	setRainProb(s: string);
+}
+
+declare class rainToday {
+	MeasuredAt: string;
+	MeasuredRainfallMM: string;
+}
+
+declare class Netatmo {
+	static rainTodayAmount: rainToday;
+	static rainYesterdayAmount: rainToday;
+}
+
+declare class SlackPostChannel {
+	skip();
+	skip(s: string);
+}
+
+declare class Slack {
+	static postToChannel: SlackPostChannel;
+}
+
+
+declare class readLaterObj {
+	skip(s: string);
+	setUrl(s: string);
+}
+
+declare class Pocket {
+	static readItLater: readLaterObj;
+}
+
+declare class Line {
+	static sendMessage: Action;
+}
+
+declare class WemoLightSwitch {
+	static attributeLsOnDiscrete: Action;
+}
+
+declare class dominosOrder {
+	skip();
+}
+
+declare class Dominos {
+	static launchEasyOrder: dominosOrder;
+}
+
+declare class GoogleDoc {
+	Body: string;
+}
+
+
+declare class GoogleDocs {
+	static newDocument: GoogleDoc;
+
 }

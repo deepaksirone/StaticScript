@@ -86,6 +86,26 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                     return true;
                 }
 
+                case "length": {
+                    return true;
+                }
+
+                default: {
+                    return false;
+                }
+            }
+        }
+
+        case "RegExp": {
+            switch (method_name) {
+                case "exec": {
+                    return true;
+                }
+
+                case "test": {
+                    return true;
+                }
+
                 default: {
                     return false;
                 }

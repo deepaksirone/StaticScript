@@ -128,6 +128,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                 );
             }
             // a == b
+            case ts.SyntaxKind.EqualsEqualsEqualsToken:
             case ts.SyntaxKind.EqualsEqualsToken: {
                 const left = buildFromExpression(node.left, ctx, builder);
                 const right = buildFromExpression(node.right, ctx, builder);
@@ -160,6 +161,16 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                                 let res = builder.createICmpEQ(call_expr, llvm.ConstantInt.get(ctx.llvmContext, 0, 32));
                                 return new Primitive(res, ValueTypeEnum.BOOLEAN);
                             }
+                        }
+
+                        case ValueTypeEnum.ARRAY: {
+                            //Have an array comparison function here
+                            //TODO: More sophisticated Array Comparison, just pointer to int conversion now
+                            let l = builder.createPtrToInt(left.getValue(), llvm.Type.getInt64Ty(ctx.llvmContext));
+                            let r = builder.createPtrToInt(right.getValue(), llvm.Type.getInt64Ty(ctx.llvmContext));
+                            let res = builder.createICmpEQ(l, r);
+                            return new Primitive(res, ValueTypeEnum.BOOLEAN);
+    
                         }
 
                         default:
@@ -438,6 +449,15 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                         let res = builder.createICmpNE(l, r);
                         return new Primitive(res, ValueTypeEnum.BOOLEAN);
 
+                    }
+
+                    case ValueTypeEnum.BOOLEAN: {
+                        return new Primitive(
+                            builder.createICmpNE(
+                                loadIfNeeded(left, builder),
+                                loadIfNeeded(right, builder)
+                            )
+                        );
                     }
 
                     default:

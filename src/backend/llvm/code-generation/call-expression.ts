@@ -61,7 +61,13 @@ export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.Cal
                 console.log(`Function Name: ${fn_name}`);
 
                 if (isAPIFunction(parent_class, method_name)) {
-                    let api_struct = buildFromExpression(node.expression, ctx, builder);
+                    let api_struct;
+                    if (node.expression.kind != ts.SyntaxKind.PropertyAccessExpression) {
+                        api_struct = buildFromExpression(node.expression, ctx, builder);
+                    } else {
+                        let n = <ts.PropertyAccessExpression>(node.expression);
+                        api_struct = buildFromExpression(n.expression, ctx, builder);
+                    }
                     let call_expr = generateAPIFunctionCall(parent_class, method_name, api_struct, node, ctx, builder);
                     console.log("Generated call expression for method call");
 

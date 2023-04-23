@@ -73,7 +73,7 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 	
 	console.log(`[PropertyAccessExpressionCodeGenerator] The full name: ${fullFnName[0]}`)
 	let isRuleIngredientTuple = IsRuleIngredient(fullFnName[0], ctx.llvmContext);
-	if (fullFnName[1] == LANGUAGE_DEFINITION_FILE) {
+	if (fullFnName[1] == LANGUAGE_DEFINITION_FILE && !isJSProperty(node)) {
 		console.log(`[PropertyAccessExpressionCodeGenerator] Parent class in lang def file`)
 		if (ctx.apiFunction.has(fullFnName[0])) {
 			let fn = ctx.apiFunction.get(fullFnName[0]);
@@ -139,7 +139,8 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 		switch (propertyName) {
 			case "length":
 				//const arr_ref: ArrayReference = <ArrayReference>ctx.scope.variables.get(<string>(<ts.Identifier>node.expression).escapedText);
-				const variable = ctx.scope.variables.get(<string>(<ts.Identifier>node.expression).escapedText);
+				//const variable = ctx.scope.variables.get(<string>(<ts.Identifier>node.expression).escapedText);
+				const variable = buildFromExpression(node.expression, ctx, builder);
 				if (variable.isString()) {
 					// Generate __str_len call
 					if (!ctx.apiFunction.has("__str_len")) {
@@ -164,9 +165,36 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 				} 
 				//Array Type
 				else {
+					//FIXME: generate function call for array length
+					let t = <ArrayReference>variable;
+					
+					if (t.elementType.isPointerTy()) {
+						if (!ctx.apiFunction.has("__str_array_len")) {
+							let return_type = new NativeType(llvm.Type.getDoubleTy(ctx.llvmContext));
+							let params = [llvm.PointerType.get(t.elementType, 0)];
+							let val = builder.createBitCast(variable.getValue(), params[0], "array_char**_bitcast")
+							let fn_type = llvm.FunctionType.get(return_type.getType(), params, false);
+							let fn_name = "__str_array_len"; 
+							let fn = llvm.Function.create(fn_type, llvm.LinkageTypes.ExternalLinkage, fn_name, ctx.llvmModule);
+							let args = [val]
+							let call_expr = builder.createCall(fn, args);
+	
+							//let res = builder.createICmpNE(call_expr, llvm.ConstantInt.get(ctx.llvmContext, 0, 32));
+							ctx.apiFunction.set("__str_array_len", fn);
+							return new Primitive(call_expr, ValueTypeEnum.DOUBLE);
+						} else {
+							let fn = ctx.apiFunction.get("__str_array_len");
+							let params = llvm.PointerType.get(t.elementType, 0);
+							let val = builder.createBitCast(variable.getValue(), params, "array_char**_bitcast")
+							let args = [val]
+							let call_expr = builder.createCall(fn, args);
+	
+							return new Primitive(call_expr, ValueTypeEnum.DOUBLE);
+						}
+					}
 					return new Primitive(
-						llvm.ConstantFP.get(ctx.llvmContext, (<ArrayReference>variable).getNumElements()),
-						ValueTypeEnum.DOUBLE
+							llvm.ConstantFP.get(ctx.llvmContext, (<ArrayReference>variable).getNumElements()),
+							ValueTypeEnum.DOUBLE
 					);
 				}
 				
