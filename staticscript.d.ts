@@ -78,6 +78,8 @@ declare function Number(s: string): number;
 declare function RegExp(s: string): RegExp;
 declare function RegExp(r: RegExp): RegExp;
 
+declare function encodeURI(s: string): string;
+
 declare class Action {
 	skip(): void;
 	skip(s: string): void;
@@ -250,6 +252,7 @@ declare class Trigger {
 	static Title: string;
 	static CreatedAt: string;
 	static Description: string;
+	static AddedItem: string;
 }
 
 declare class Tweet {
@@ -500,6 +503,7 @@ declare class AndroidMessage {
 declare class AndroidMessages {
 	static sendAMessage: Action;
 	static receivedAMessageFromNumber: AndroidMessage;
+	static receivedAMessage: AndroidMessage;
 }
 
 declare class photoPost {
@@ -618,6 +622,7 @@ declare class PhoneCall {
 
 declare class TriggerWithOneTextObj {
 	TextField: string;
+	CreatedAt: string;
 }
 
 declare class GoogleAssistant {
@@ -643,6 +648,7 @@ declare class Netatmo {
 declare class SlackPostChannel {
 	skip();
 	skip(s: string);
+	setMessage(s: string);
 }
 
 declare class Slack {
@@ -655,8 +661,17 @@ declare class readLaterObj {
 	setUrl(s: string);
 }
 
+declare class PocketItem {
+	Title: string;
+	Url: string;
+	Excerpt: string;
+	Tags: string;
+	AddedAt: string;
+}
+
 declare class Pocket {
 	static readItLater: readLaterObj;
+	static newItemAddedPocket: PocketItem;
 }
 
 declare class Line {
@@ -762,4 +777,52 @@ declare class Todoist {
 
 declare class IosCalendar {
 	static createCalendarEvent: Action;
+}
+
+declare class ArloRecord {
+	skip(s: string);
+	skip();
+}
+
+declare class Arlo {
+	static record: ArloRecord;
+}
+
+declare class LocationObj {
+	EnteredOrExited: string;
+}
+
+declare class Location {
+	static enterOrExitRegionLocation: LocationObj;
+
+}
+
+declare class cameraAction {
+	skip();
+}
+
+declare class InvidyoTest {
+	static turnOnCamera: cameraAction;
+	static turnOffCamera: cameraAction;
+}
+
+declare class doNoteObj {
+	NoteText: string;
+}
+
+declare class DoNote {
+	static doNoteNewCommandCommon: doNoteObj;
+}
+
+declare class IosRemindersObj {
+	setTitle(s: string);
+	setList(s: string);
+}
+
+declare class IosReminders {
+	static createReminderIosReminders: IosRemindersObj;
+}
+
+declare class MagicLight {
+	static changeColor: Action;
 }

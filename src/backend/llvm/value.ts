@@ -225,6 +225,17 @@ export class Primitive implements Value {
             );
         }
 
+        if (value.type.isPointerTy()) {
+            let val = builder.createPtrToInt(this.llvmValue, llvm.Type.getInt64Ty(ctx.llvmContext));
+            return new Primitive(
+                builder.createICmpNE(
+                    val,
+                    llvm.ConstantInt.get(ctx.llvmContext, 0, 64)
+                ),
+                ValueTypeEnum.BOOLEAN
+            );
+        }
+
         throw new UnsupportedError(
             node,
             `Unsupported cast ${this.llvmValue.type} to boolean`
