@@ -45,6 +45,7 @@ interface String {
 	trim(): string;
 	charAt(n: number): string;
 	slice(start: number, end: number): string;
+	slice(dist_from_end: number): string;
 	length: number;
 	match(s: string): Array<string>;
 	match(r: RegExp): Array<string>;
@@ -53,6 +54,7 @@ interface String {
 	substr(start: number, end: number): string;
 	search(t: RegExp): number;
 	search(s: string): number;
+	lastIndexOf(s: string): number;
 }
 
 interface Array<T> {
@@ -82,6 +84,7 @@ declare class Action {
 	setMessage(s: string);
 	setIssueTitle(s: string);
 	setIssueBody(s: string);
+	setText(s: string);
 }
 
 declare class MomentJS {
@@ -117,6 +120,7 @@ declare class Smartthings {
 declare class currentWeather {
 	HighTempCelsius: number;
 	Condition: string;
+	TodaysCondition: string;
 }
 
 declare class Weather {
@@ -145,9 +149,15 @@ declare class eventEndsObj {
 	Title: string;
 }
 
+declare class quickAddEventObj {
+	skip();
+	setQuickAdd(s: string);
+}
+
 declare class GoogleCalendar {
 	static addDetailedEvent: addDetailedEventObj;
 	static anyEventEnds: eventEndsObj;
+	static quickAddEvent: quickAddEventObj;
 }
 
 declare class LutronCasetaWireless {
@@ -225,6 +235,7 @@ declare class AddTrackToPlaylist {
 declare class Spotify {
 	static newTrackAddedToPlaylist: SpotifyTrackPlayListAdded;
 	static addATrackToAPlaylist: AddTrackToPlaylist;
+	static newRecentlyPlayedTrack: SpotifyTrackPlayListAdded;
 }
 
 declare class Gmail {
@@ -266,10 +277,12 @@ declare class Twitter {
 
 declare class FeedEntry {
 	EntryTitle: string;
+	EntryContent: string;
 }
 
 declare class Feed {
 	static newFeedItem: FeedEntry;
+	static newFeedItemMatches: FeedEntry;
 }
 
 declare class sendMsgObj {
@@ -363,6 +376,7 @@ declare class Netro {
 	static sensorData: sensData;
 	static noWater: Action;
 	static reportWeather: WeatherObj;
+	static water: Action;
 }
 
 declare class alertTime {
@@ -376,6 +390,7 @@ declare class AmazonAlexa {
 declare class callDevice {
 	setMessage(s: string);
 	skip(s: string);
+	skip();
 }
 
 declare class VoipCalls {
@@ -478,8 +493,13 @@ declare class AndroidDevice {
 	static playBestSong: Action;
 }
 
+declare class AndroidMessage {
+	Text: string;
+}
+
 declare class AndroidMessages {
 	static sendAMessage: Action;
+	static receivedAMessageFromNumber: AndroidMessage;
 }
 
 declare class photoPost {
@@ -510,6 +530,7 @@ declare class DCUPlaidIFTTT {
 declare class smsMessage {
 	setMessage(s: string);
 	skip();
+	skip(s: string);
 }
 
 declare class Sms {
@@ -571,6 +592,7 @@ declare class MakeItDonate {
 
 declare class EwelinkAction {
 	skip();
+	skip(s: string);
 }
 
 declare class Ewelink {
@@ -655,10 +677,89 @@ declare class Dominos {
 
 declare class GoogleDoc {
 	Body: string;
+	skip();
 }
 
 
 declare class GoogleDocs {
 	static newDocument: GoogleDoc;
+	static appendToGoogleDoc: GoogleDoc;
 
+}
+
+declare class LifxColor {
+	setAdvancedOptions(s: string);
+}
+
+
+declare class Lifx {
+	static color:  LifxColor;
+	static turnOn: Action;
+	static breathe: LifxColor;
+}
+
+
+declare class NestThermostatPoint {
+	TemperatureSetpoint: string;
+}
+
+declare class NetatmoThermostat { 
+	static getsetpointmanual: NestThermostatPoint;
+}
+
+declare class DaikinOnControl {
+	setSetpoint(s: string);
+	skip();
+}
+
+declare class DaikinOffControl {
+	setSetpoint(s: string);
+	skip();
+}
+
+declare class DaikinOnlineController {
+	static turnAcUnitOn: DaikinOnControl;
+	static turnUnitOff: DaikinOffControl;
+}
+
+declare class Smartlife {
+	static turnOn: Action;
+}
+
+declare class buttonNewCommandCommon {
+	Latitude: string;
+	Longitude: string;
+}
+
+declare class DoButton {
+	static doButtonNewCommandCommon: buttonNewCommandCommon;
+}
+
+declare class NetindicatorPortfolio {
+	Increase: string;
+}
+
+declare class Netindicator {
+	static portfolio: NetindicatorPortfolio;
+}
+
+declare class StravaActivity {
+	DistanceMeters: string;
+}
+
+declare class Strava {
+	static newActivityByYou: StravaActivity;
+}
+
+declare class TodoistTask {
+	setTaskContent(s: string);
+	setNote(s: string);
+}
+
+declare class Todoist {
+	static createTask: TodoistTask;
+}
+
+declare class IosCalendar {
+	static createCalendarEvent: Action;
 }

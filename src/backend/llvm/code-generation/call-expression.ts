@@ -47,7 +47,7 @@ export class CallExpressionCodeGenerator implements NodeGenerateInterface<ts.Cal
     
 	var callle = null;
 	if (signature) {
-        //console.log(signature);
+        console.log(signature);
 		switch ((<ts.SignatureDeclaration>signature.declaration).kind) {
             case ts.SyntaxKind.MethodSignature:
 			case ts.SyntaxKind.MethodDeclaration: {

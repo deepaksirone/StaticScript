@@ -74,6 +74,9 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 case "slice": {
                     return true;
                 }
+                case "lastIndexOf": {
+                    return true;
+                }
                 default: {
                     return false;
                 }

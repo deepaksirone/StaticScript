@@ -99,6 +99,18 @@ export class ArrayReference implements Value {
     }
 
     public toBoolean(ctx: Context, builder: llvm.IRBuilder, node: ts.Node): Value {
+        if (this.llvmValue.type.isPointerTy()) {
+            // Convert the array pointer to integer and insert a null check
+            let val = builder.createPtrToInt(this.llvmValue, llvm.Type.getInt64Ty(ctx.llvmContext));
+            return new Primitive(
+                builder.createICmpNE(
+                    val,
+                    llvm.ConstantInt.get(ctx.llvmContext, 0, 64)
+                ),
+                ValueTypeEnum.BOOLEAN
+            );
+        }
+
         throw new UnsupportedError(node, 'Cannot cast ClassReference to boolean');
     }
 

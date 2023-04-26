@@ -49,7 +49,9 @@ export function emitCondition(
     const left = buildFromExpression(condition, ctx, builder);
 
     const conditionBoolValue = left.toBoolean(ctx, builder, condition);
-    builder.createCondBr(conditionBoolValue.getValue(), positiveBlock, negativeBlock);
+    let loaded_val = loadIfNeeded(conditionBoolValue, builder);
+    //builder.createCondBr(conditionBoolValue.getValue(), positiveBlock, negativeBlock);
+    builder.createCondBr(loaded_val, positiveBlock, negativeBlock);
 }
 
 export function buildFromString(value: string, ctx: Context, builder: llvm.IRBuilder): Value {
