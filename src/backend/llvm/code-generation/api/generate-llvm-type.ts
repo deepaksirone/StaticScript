@@ -10,6 +10,7 @@ export function generate_runtime_struct_type(type: string, ctx: Context): llvm.T
         case "MomentJS": {
             return llvm.StructType.get(ctx.llvmContext, [llvm.Type.getDoubleTy(ctx.llvmContext)]);
         }
+        case "Time":
         case "Date": {
             return llvm.StructType.get(ctx.llvmContext, [llvm.Type.getDoubleTy(ctx.llvmContext)]);
         }
@@ -36,6 +37,7 @@ export function generate_runtime_struct_type(type: string, ctx: Context): llvm.T
 export function isJSRuntimeType(type: string) {
     switch (type) {
         case "MomentJS": return true;
+        case "Time": return true;
         default: return false;
     }
 }

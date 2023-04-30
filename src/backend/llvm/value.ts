@@ -111,7 +111,7 @@ export class ArrayReference implements Value {
             );
         }
 
-        throw new UnsupportedError(node, 'Cannot cast ClassReference to boolean');
+        throw new UnsupportedError(node, 'Cannot cast ArrayReference to boolean');
     }
 
     public isString(): boolean {

@@ -425,9 +425,12 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
             return buildFromRegularExpressionValue(<any>block, ctx, builder);
         case ts.SyntaxKind.NullKeyword:
             return buildFromNullExpr(<any>block, ctx, builder);
+        case ts.SyntaxKind.TemplateExpression:
+            //FIXME: Implement Template Expression 
         default:
 	    //console.trace();
 	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);
+        //console.log((<any>block).templateSpans[0])
             //const v = (<ts.ObjectLiteralExpression<ts.ObjectLiteralElementLike>>block).properties[5].name;
 	    //const v : ts.PropertyAssignment = (<ts.ObjectLiteralExpression>block).properties[5] as ts.PropertyAssignment;
             //console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 

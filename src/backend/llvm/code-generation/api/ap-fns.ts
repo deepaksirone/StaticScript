@@ -68,6 +68,9 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 case "toUpperCase": {
                     return true;
                 }
+                case "toLowerCase": {
+                    return true;
+                }
                 case "split": {
                     return true;
                 }
@@ -75,6 +78,9 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                     return true;
                 }
                 case "lastIndexOf": {
+                    return true;
+                }
+                case "substring": {
                     return true;
                 }
                 default: {
@@ -88,11 +94,12 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 case "toString": {
                     return true;
                 }
-
                 case "length": {
                     return true;
+                }                
+                case "join": {
+                    return true;
                 }
-
                 default: {
                     return false;
                 }
@@ -106,6 +113,18 @@ export function isAPIFunction(class_name: string, method_name: string): Boolean 
                 }
 
                 case "test": {
+                    return true;
+                }
+
+                default: {
+                    return false;
+                }
+            }
+        }
+
+        case "Time": {
+            switch (method_name) {
+                case "format": {
                     return true;
                 }
 

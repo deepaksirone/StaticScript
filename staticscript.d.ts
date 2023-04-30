@@ -55,6 +55,7 @@ interface String {
 	search(t: RegExp): number;
 	search(s: string): number;
 	lastIndexOf(s: string): number;
+	substring(n: number): string;
 }
 
 interface Array<T> {
@@ -87,20 +88,25 @@ declare class Action {
 	setIssueTitle(s: string);
 	setIssueBody(s: string);
 	setText(s: string);
+	setLinkUrl(s: string);
 }
 
 declare class MomentJS {
 	add(rhs: MomentJS): MomentJS;
 	add(n: number, s: string): MomentJS;
 	toString(): string;
+	format(s: string): string;
 	day(): number;
 	hour(): number;
 	hour(n: number): MomentJS;
 	minute(n: number): MomentJS;
+	weekday(): number;
 	constructor();
 	constructor(s: string);
 }
 declare function moment(): MomentJS;
+declare function moment(t: Time): MomentJS;
+declare function moment(s: string): MomentJS;
 declare function moment(t: MomentJS, format: string): MomentJS;
 declare function moment(s: string, format: string): MomentJS;
 
@@ -123,13 +129,14 @@ declare class currentWeather {
 	HighTempCelsius: number;
 	Condition: string;
 	TodaysCondition: string;
+	LowTempFahrenheit: string;
 }
 
 declare class Weather {
 	static tomorrowsForecastCallsFor: TriggerData;
 	static currentWeatherAtTime: currentWeather;
 	static currentConditionIs: currentWeather;
-
+	static tomorrowsWeatherAtTime: currentWeather;
 }
 
 declare class placeAPhoneCallObj {
@@ -145,6 +152,9 @@ declare class addDetailedEventObj {
 	setEndTime(endtime: string);
 	setStartTime(s: string);
 	setDescription(s: string);
+	skip(s: string);
+	skip();
+	setAllDay(s: string);
 }
 
 declare class eventEndsObj {
@@ -156,10 +166,26 @@ declare class quickAddEventObj {
 	setQuickAdd(s: string);
 }
 
+declare class newEventAddedObj {
+	Starts: string;
+	Where: string;
+	Ends: string;
+}
+
+declare class eventStartsObj {
+	Title: string;
+}
+
 declare class GoogleCalendar {
 	static addDetailedEvent: addDetailedEventObj;
 	static anyEventEnds: eventEndsObj;
+	static anyEventStarts: eventStartsObj;
 	static quickAddEvent: quickAddEventObj;
+	static newEventAdded: newEventAddedObj;
+}
+
+declare class GardenaSmartSystem {
+	static actionMOWERPARKUNTILNEXTTASK: Action;
 }
 
 declare class LutronCasetaWireless {
@@ -196,6 +222,7 @@ declare class Hue {
 	static setScene: Action;
 	static turnOnAllHue: Action;
 	static toggleAllHue: Action;
+	static setBrightnessAllHue: HueColor;
 }
 
 declare class IfNotifications {
@@ -209,12 +236,18 @@ declare class Skybell {
 
 declare class sendMeEmailObj {
 	skip();
+	skip(s: string);
 	setSubject(s: string);
 	setBody(s: string);
 }
 
+declare class IftttEmail {
+	BodyHTML: string;
+}
+
 declare class Email {
 	static sendMeEmail: sendMeEmailObj;
+	static sendIftttAnEmail: IftttEmail;
 }
 
 declare class SpotifyTrackPlayListAdded {
@@ -238,6 +271,7 @@ declare class Spotify {
 	static newTrackAddedToPlaylist: SpotifyTrackPlayListAdded;
 	static addATrackToAPlaylist: AddTrackToPlaylist;
 	static newRecentlyPlayedTrack: SpotifyTrackPlayListAdded;
+	static startPlayback: Action;
 }
 
 declare class Gmail {
@@ -304,11 +338,14 @@ declare class EvernoteNote {
 	skip();
 	skip(s: string);
 	setTitle(s: string);
+	
 
 }
 
 declare class Evernote {
 	static appendToNote: EvernoteNote;
+	static appendChecklistItem: EvernoteNote;
+	static createNote: EvernoteNote;
 }
 
 declare class GooglePhoto {
@@ -415,22 +452,28 @@ declare class Instagram {
 
 declare class PhotoPage {
 	skip();
+	setPhotoUrl(s: string);
+	setMessage(s: string);
+	setAlbum(s: string);
 }
 
 declare class StatusMessage {
 	Message: string;
 	PageUrl: string;
+	skip();
+	skip(s: string);
 }
 
 declare class FacebookPages {
 	static createPhotoPage: PhotoPage;
 	static newStatusMessageByPage: StatusMessage;
+	static createStatusMessagePage: StatusMessage;
 }
-
 
 declare class createFeedly {
 	skip(s: string);
 }
+
 declare class Feedly { 
 	static createNewEntryFeedly: createFeedly;
 }
@@ -451,16 +494,21 @@ declare class Roostermoney {
 declare class WemoStatus {
 	SwitchName: string;
 	SwitchedOffAt: string;
+	SwitchedOnAt: string;
+	SwitchedToStandbyAt: string;
 }
 
 declare class WemoInsightSwitch {
 	static attributeINSIGHTOFFN: WemoStatus;
 	static attributeInsightOnDiscrete: Action;
+	static attributeINSIGHTONN: WemoStatus;
+	static attributeINSIGHTSTANDBYN: WemoStatus;
 }
 
 declare class GoogleSpreadSheet {
 	setFormattedRow(s: string);
 	skip();
+	skip(s: string);
 }
 
 declare class GoogleSheetRow {
@@ -494,6 +542,7 @@ declare class AndroidDevice {
 	static setDeviceVolume: deviceVolume;
 	static bluetoothConnected: androidBluetooth;
 	static playBestSong: Action;
+	
 }
 
 declare class AndroidMessage {
@@ -565,10 +614,13 @@ declare class MonzoCardPurchase {
 	AccountCurrencyCode: string;
 	LocalCurrencyCode: string;
 	AmountInAccountCurrency: string;
+	AmountInLocalCurrency: string;
+	AccountCurrencySymbol: string;
 }
 
 declare class MonzoPotWithdraw {
 	skip();
+	skip(s: string);
 	setAmount(s: string);
 }
 
@@ -576,6 +628,7 @@ declare class Monzo {
 	static potDeposit: MonzoPotDeposit;
 	static cardPurchase: MonzoCardPurchase;
 	static potWithdraw: MonzoPotWithdraw;
+	static cardPurchaseWithMerchant: MonzoCardPurchase;
 }
 
 declare class StripeNewTransfer {
@@ -602,6 +655,7 @@ declare class EwelinkAction {
 declare class Ewelink {
 	static switchAction: EwelinkAction;
 	static plugAction: EwelinkAction;
+	static plugs3Action: EwelinkAction;
 }
 
 declare class dataFromTheBea {
@@ -659,6 +713,7 @@ declare class Slack {
 declare class readLaterObj {
 	skip(s: string);
 	setUrl(s: string);
+	skip();
 }
 
 declare class PocketItem {
@@ -692,6 +747,8 @@ declare class Dominos {
 
 declare class GoogleDoc {
 	Body: string;
+	setFilename(s: string);
+	setBody(s: string);
 	skip();
 }
 
@@ -704,6 +761,7 @@ declare class GoogleDocs {
 
 declare class LifxColor {
 	setAdvancedOptions(s: string);
+	skip();
 }
 
 
@@ -711,15 +769,18 @@ declare class Lifx {
 	static color:  LifxColor;
 	static turnOn: Action;
 	static breathe: LifxColor;
+	static activateScene: Action;
 }
 
 
 declare class NestThermostatPoint {
 	TemperatureSetpoint: string;
+	skip();
 }
 
 declare class NetatmoThermostat { 
 	static getsetpointmanual: NestThermostatPoint;
+	static setpointmodemanual: NestThermostatPoint;
 }
 
 declare class DaikinOnControl {
@@ -739,6 +800,7 @@ declare class DaikinOnlineController {
 
 declare class Smartlife {
 	static turnOn: Action;
+	static activateScene: Action;
 }
 
 declare class buttonNewCommandCommon {
@@ -808,6 +870,7 @@ declare class InvidyoTest {
 
 declare class doNoteObj {
 	NoteText: string;
+	OccurredAt: string;
 }
 
 declare class DoNote {
@@ -817,6 +880,7 @@ declare class DoNote {
 declare class IosRemindersObj {
 	setTitle(s: string);
 	setList(s: string);
+	setAlarmDate(s: string);
 }
 
 declare class IosReminders {
@@ -825,4 +889,150 @@ declare class IosReminders {
 
 declare class MagicLight {
 	static changeColor: Action;
+}
+
+declare class NjTransitObj {
+	ContentHtml: string;
+}
+
+declare class NjTransit {
+	static newLightRailAdvisory: NjTransitObj;
+}
+
+declare class _500pxPhotoFromUrl {
+	setPhotoUrl(s: string);
+	setTitle(s: string);
+	setDescription(s: string);
+	setTags(s: string);
+}
+
+declare class _500px {
+	static uploadPublicPhotoFromUrl: _500pxPhotoFromUrl;
+}
+
+declare class Math {
+    /**
+     * Returns the greatest integer less than or equal to its numeric argument.
+     */
+    static floor(value: number): number;
+    static round(value: number): number;
+    static sqrt(value: number): number;
+    static pow(value: number, power: number): number;
+    static random(): number;
+    static abs(value: number): number;
+    static ceil(val: number): number;
+}
+
+declare class Time {
+    hour(): number;
+	hours(n: number): number;
+	day(): number;
+	second(): number;
+    minute(): number;
+	month(): number;
+	year(): number;
+	format(s: string): string;
+    format(): string;
+    weekday(): number;
+    locale(s: string): Time;
+    isoWeekday(): number;
+	isBetween(t1: MomentJS, t2: MomentJS): boolean;
+    add(n: number, format: string): Time;
+}
+
+declare class Meta {
+    static currentUserTime: Time;
+    static triggerTime: Time;
+}
+
+declare class NotebookNotecard {
+	NotecardHtmlContent: string;
+}
+
+declare class Notebook {
+	static newTextNotecardInNotebook: NotebookNotecard;
+}
+
+declare class TwitchVideo {
+	VideoUrl: string;
+	VideoTitle: string;
+}
+
+declare class Twitch {
+	static newVideoByYou: TwitchVideo;
+}
+
+declare class Meross {
+	static turnOff: Action;
+	static turnOn: Action;
+}
+
+declare class Gogogate {
+	static closeDoor: Action; 
+}
+
+declare class IosReadingList {
+	static createReadingListItem: Action;
+}
+
+declare class Irobot {
+	static dockRobot: Action;
+}
+
+declare class EcobeeEvent {
+	EventType: string;
+}
+
+declare class Ecobee {
+	static motionDetected: EcobeeEvent;
+}
+
+declare class Aquanta {
+	static cancelAway: Action;
+	static away: Action;
+}
+
+declare class Office365Obj {
+	Subject: string;
+}
+
+declare class Office365Mail {
+	static newEmailFrom: Office365Obj;
+}
+
+declare class TadoAirConditioning {
+	static startHeating: Action;
+}
+
+declare class CiscoSpark {
+	static postAMessage: Action;
+}
+
+declare class SomfyProtect {
+	static soundSiren: Action;
+}
+
+declare class WinkShortcuts {
+	static activateScene: Action;
+}
+
+declare class PropellerForecasts {
+	ForecastRiskLevel: string;
+	LastForecastRiskLevel: string;
+}
+
+declare class AirByPropeller {
+	static forecasts: PropellerForecasts;
+}
+
+declare class CtaAlert {
+	AlertContent: string;
+}
+
+declare class Cta {
+	static newRailAlert: CtaAlert;
+}
+
+declare class Kasa {
+	static turnOn: Action;
 }

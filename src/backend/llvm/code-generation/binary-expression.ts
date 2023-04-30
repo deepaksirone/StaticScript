@@ -7,6 +7,7 @@ import {NativeType} from "../native-type";
 import {ArrayReference, Primitive, Value, ValueTypeEnum} from "../value";
 import UnsupportedError from "../../error/unsupported.error";
 import {buildFromExpression, loadIfNeeded} from "../index";
+import { assert } from "console";
 
 export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.BinaryExpression, Value> {
     generate(node: ts.BinaryExpression, ctx: Context, builder: llvm.IRBuilder): Value {
@@ -394,11 +395,11 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
         case ts.SyntaxKind.AmpersandAmpersandToken: {
             const left = buildFromExpression(node.left, ctx, builder);
 		    const right = buildFromExpression(node.right, ctx, builder);
-
+            
             return new Primitive(
 		        builder.createAnd(
-			        loadIfNeeded(left, builder), 
-			        loadIfNeeded(right, builder), 
+			        loadIfNeeded(left.toBoolean(ctx, builder, node.left), builder), 
+			        loadIfNeeded(right.toBoolean(ctx, builder, node.right), builder), 
 			        "and"
 		        ),
 		        ValueTypeEnum.BOOLEAN

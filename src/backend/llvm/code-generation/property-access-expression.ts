@@ -9,6 +9,8 @@ import UnsupportedError from "../../error";
 import {IsRuleIngredient} from "./rule-ingredient"
 import {buildFromExpression, loadIfNeeded} from "../index";
 import {LANGUAGE_DEFINITION_FILE} from "../../../constants"
+import {generate_runtime_struct_type} from "./api/generate-llvm-type"
+import {NativeTypeResolver} from "../native-type-resolver"
 
 function getFullnameFromProperty(node: ts.Expression, ctx: Context): [string, string] {
 	switch (node.kind) {
@@ -34,24 +36,6 @@ function getFullnameFromProperty(node: ts.Expression, ctx: Context): [string, st
 	return ['', ""];
 }
 
-function resolveLLVMType(type: string, ctx: llvm.LLVMContext): llvm.Type {
-
-	switch (type) {
-		case "string": {
-			let stringPtrType = llvm.Type.getInt8PtrTy(ctx);
-			return stringPtrType;
-		}
-		case "integer": {
-			let doublePtrType = llvm.Type.getDoubleTy(ctx);
-			return doublePtrType;
-		}
-		default: {
-                        let doublePtrType = llvm.Type.getDoubleTy(ctx);
-                        return doublePtrType;
-                }
-	}
-}
-
 function isJSProperty(node: ts.PropertyAccessExpression): boolean {
 	switch (<string>(<ts.PropertyAccessExpression>node).name.escapedText) {
 		case "length":
@@ -67,19 +51,25 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 	// Check if the property is an ingredient:
 	let fullFnName = getFullnameFromProperty(node, ctx);
 	let typ = ctx.typeChecker.getTypeAtLocation(node);
-	console.log("The type of property: " + (<any>typ).intrinsicName);
+	let typ_parent = ctx.typeChecker.getTypeAtLocation(node.expression)
+	console.log("The type of property: " + ((<any>typ).intrinsicName || typ.symbol.getEscapedName()));
+	//console.log(typ.symbol.getEscapedName())
+
+	//console.log("The type of parent property: " + (<any>typ_parent).intrinsicName)
 	
 	//console.log(typ.symbol.getDeclarations())
 	
 	console.log(`[PropertyAccessExpressionCodeGenerator] The full name: ${fullFnName[0]}`)
+	console.log(`[PropertyAccessExpressionCodeGenerator] The defs file: ${fullFnName[1]}`)
 	let isRuleIngredientTuple = IsRuleIngredient(fullFnName[0], ctx.llvmContext);
 	if (fullFnName[1] == LANGUAGE_DEFINITION_FILE && !isJSProperty(node)) {
 		console.log(`[PropertyAccessExpressionCodeGenerator] Parent class in lang def file`)
+		let typename = ((<any>typ).intrinsicName || typ.symbol.getEscapedName())
 		if (ctx.apiFunction.has(fullFnName[0])) {
 			let fn = ctx.apiFunction.get(fullFnName[0]);
-			let returnTy = resolveLLVMType((<any>typ).intrinsicName, ctx.llvmContext);
+			let returnTy = NativeTypeResolver.getType(typ, ctx)
 			let fnType = llvm.FunctionType.get(
-				returnTy,
+				returnTy.getType(),
 				[],
 				false
 			);
@@ -91,9 +81,9 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 						 ), valEnum 
 			   );
 		}
-		let returnTy = resolveLLVMType((<any>typ).intrinsicName, ctx.llvmContext);
+		let returnTy = NativeTypeResolver.getType(typ, ctx)//resolveLLVMType(typename, ctx);
 		let fnType = llvm.FunctionType.get(
-			returnTy,
+			returnTy.getType(),
 		[],
 		false);
 		let fn = llvm.Function.create(

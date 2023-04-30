@@ -5,7 +5,7 @@ import {NodeGenerateInterface} from "../node-generate.interface";
 import {Context} from "../context";
 import {ArrayReference} from "../value";
 import {NativeType} from "../native-type";
-import {buildFromExpression} from "../index"
+import {buildFromExpression, loadIfNeeded} from "../index"
 import UnsupportedError from "../../error";
 
 export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterface<ts.ArrayLiteralExpression, ArrayReference> {
@@ -75,7 +75,7 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
 		    const arrIdx2 = llvm.ConstantInt.get(ctx.llvmContext, 0, 64);
 		    const idxArray : Array<llvm.Value> = [arrIdx2, arrIdx1];
 		    const arrayPtr = builder.createInBoundsGEP(array, idxArray);
-		    builder.createStore(val.getValue(), arrayPtr);
+		    builder.createStore(loadIfNeeded(val, builder), arrayPtr);
 	    }
 
     }
