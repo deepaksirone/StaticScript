@@ -38,6 +38,7 @@ import {FunctionDeclarationCodeGenerator} from "./code-generation/function-decla
 import {TypeOfExpressionCodeGenerator} from "./code-generation/typeof-expression";
 import {PrefixUnaryExpressionCodeGenerator} from "./code-generation/prefix-unary-expression";
 import {ElementAccessExpressionGenerator} from "./code-generation/element-access-expression";
+import { TemplateExpressionCodeGenerator } from "./code-generation/template-expression";
 
 export function emitCondition(
     condition: ts.Expression,
@@ -62,6 +63,10 @@ export function buildFromString(value: string, ctx: Context, builder: llvm.IRBui
 }
 
 export function buildFromStringValue(node: ts.StringLiteral, ctx: Context, builder: llvm.IRBuilder): Value {
+    return buildFromString(node.text, ctx, builder);
+}
+
+export function buildFromTemplateHeadMiddleOrTail(node: ts.TemplateMiddle | ts.TemplateTail | ts.TemplateHead, ctx: Context, builder: llvm.IRBuilder): Value {
     return buildFromString(node.text, ctx, builder);
 }
 
@@ -426,11 +431,13 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
         case ts.SyntaxKind.NullKeyword:
             return buildFromNullExpr(<any>block, ctx, builder);
         case ts.SyntaxKind.TemplateExpression:
-            //FIXME: Implement Template Expression 
+            //FIXME: Implement Template Expression
+            return new TemplateExpressionCodeGenerator().generate(block as ts.TemplateExpression, ctx, builder); 
         default:
 	    //console.trace();
 	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);
-        //console.log((<any>block).templateSpans[0])
+        //console.log(block)
+        console.log((<any>block).templateSpans[0])
             //const v = (<ts.ObjectLiteralExpression<ts.ObjectLiteralElementLike>>block).properties[5].name;
 	    //const v : ts.PropertyAssignment = (<ts.ObjectLiteralExpression>block).properties[5] as ts.PropertyAssignment;
             //console.log(`The type of properties: ${ts.SyntaxKind[v.kind]}, 

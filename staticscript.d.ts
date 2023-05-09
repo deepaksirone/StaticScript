@@ -56,6 +56,7 @@ interface String {
 	search(s: string): number;
 	lastIndexOf(s: string): number;
 	substring(n: number): string;
+	substring(s: number, e: number): string;
 }
 
 interface Array<T> {
@@ -1008,8 +1009,14 @@ declare class CiscoSpark {
 	static postAMessage: Action;
 }
 
+declare class SomfyObj {
+	skip();
+	setLevel();
+}
+
 declare class SomfyProtect {
 	static soundSiren: Action;
+	static setSecurity: SomfyObj;
 }
 
 declare class WinkShortcuts {
