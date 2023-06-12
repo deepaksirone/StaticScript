@@ -1043,3 +1043,20 @@ declare class Cta {
 declare class Kasa {
 	static turnOn: Action;
 }
+
+declare class Harmony {
+	static startActivity: Action;
+}
+
+declare class WemoLighting {
+	static groupLedBrightnessChange: Action;
+	static groupLedTurnOn: Action;
+}
+
+declare class EmailDigest {
+	static sendWeeklyEmail: Action;
+}
+
+declare class Qapital {
+	static saveTowardGoal: Action;
+}
