@@ -174,13 +174,24 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
     
                         }
 
-                        default:
+                        case ValueTypeEnum.BOOLEAN: {
+                            return new Primitive(
+                                builder.createICmpEQ(
+                                    loadIfNeeded(left, builder),
+                                    loadIfNeeded(right, builder)
+                                )
+                            );
+                        }
+                        
+                        default: {
+                            console.log("Generating FCMP for type: " + left.getType());
                             return new Primitive(
                                 builder.createFCmpOEQ(
                                     loadIfNeeded(left, builder),
                                     loadIfNeeded(right, builder)
                                 )
                             );
+                        }
                     }
                 }
             }
