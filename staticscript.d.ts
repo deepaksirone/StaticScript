@@ -16,7 +16,9 @@ declare type float32 = {};
 declare type float64 = number;
 declare type float128 = {};
 
-interface Boolean {}
+interface Boolean {
+	constructor(b: boolean): boolean;
+}
 
 interface Function {}
 
@@ -42,6 +44,8 @@ interface String {
 	constructor(f: number): string;
 	indexOf(s: string): number;
 	split(s: string): Array<string>;
+	split(s: string, n: number): Array<string>;
+	split(s: RegExp): Array<string>;
 	trim(): string;
 	charAt(n: number): string;
 	slice(start: number, end: number): string;
@@ -80,6 +84,7 @@ declare function Number(s: string): number;
 declare function RegExp(s: string): RegExp;
 declare function RegExp(r: RegExp): RegExp;
 
+
 declare function encodeURI(s: string): string;
 
 declare class Action {
@@ -90,6 +95,16 @@ declare class Action {
 	setIssueBody(s: string);
 	setText(s: string);
 	setLinkUrl(s: string);
+	setTitle(s: string);
+	setDescription(s: string);
+	setPos(s: string);
+	setUrl(s: string);
+	setEnd(s: string);
+	setNotes(s: string);
+	setStartDate(s: string);
+	setDuration(s: string);
+	setSubject(s: string);
+	setBody(s: string);
 }
 
 declare class MomentJS {
@@ -101,6 +116,8 @@ declare class MomentJS {
 	hour(): number;
 	hour(n: number): MomentJS;
 	minute(n: number): MomentJS;
+	minutes(): number;
+	hours(): number;
 	weekday(): number;
 	constructor();
 	constructor(s: string);
@@ -143,16 +160,20 @@ declare class Weather {
 declare class placeAPhoneCallObj {
 	OccurredAt: string;
 	CallLength: string;
+	ContactName: string;
+	FromNumber: string;
 }
 
 declare class AndroidPhone {
 	static placeAPhoneCall: placeAPhoneCallObj;
+	static receiveAPhoneCall: placeAPhoneCallObj;
 }
 
 declare class addDetailedEventObj {
 	setEndTime(endtime: string);
 	setStartTime(s: string);
 	setDescription(s: string);
+	setLocation(s: string);
 	skip(s: string);
 	skip();
 	setAllDay(s: string);
@@ -160,6 +181,7 @@ declare class addDetailedEventObj {
 
 declare class eventEndsObj {
 	Title: string;
+	Description: string;
 }
 
 declare class quickAddEventObj {
@@ -183,6 +205,7 @@ declare class GoogleCalendar {
 	static anyEventStarts: eventStartsObj;
 	static quickAddEvent: quickAddEventObj;
 	static newEventAdded: newEventAddedObj;
+	static eventFromSearchStarts: eventEndsObj;
 }
 
 declare class GardenaSmartSystem {
@@ -389,11 +412,13 @@ declare class WemoSwitch {
 
 declare class RedditPost {
 	Title: string;
+	PostURL: string;
 }
 
 declare class Reddit {
 	static newHotPostInSubreddit: RedditPost;
 	static submitLinkReddit: Action;
+	static newPostInSubreddit: RedditPost;
 }
 
 declare class Yeelight {
@@ -405,8 +430,13 @@ declare class VideoDesc {
 	Title: string;
 }
 
+declare class YoutubeColorTier {
+	ColorTier: string;
+}
+
 declare class Youtube {
 	static newPublicVideoFromSubscriptions: VideoDesc;
+	static newSuperchat: YoutubeColorTier;
 }
 
 declare class sensData {
@@ -539,11 +569,16 @@ declare class androidBluetooth {
 	DeviceName: string;
 }
 
+declare class AndroidNotification {
+	NotificationTitle: string;
+	ReceivedAt: string;
+}
+
 declare class AndroidDevice {
 	static setDeviceVolume: deviceVolume;
 	static bluetoothConnected: androidBluetooth;
 	static playBestSong: Action;
-	
+	static newNotificationFromApp: AndroidNotification;
 }
 
 declare class AndroidMessage {
@@ -617,6 +652,8 @@ declare class MonzoCardPurchase {
 	AmountInAccountCurrency: string;
 	AmountInLocalCurrency: string;
 	AccountCurrencySymbol: string;
+	MerchantAddress: string;
+	LocalCurrencySymbol: string;
 }
 
 declare class MonzoPotWithdraw {
@@ -927,9 +964,11 @@ declare class Math {
 declare class Time {
     hour(): number;
 	hours(n: number): number;
+	hours(): number;
 	day(): number;
 	second(): number;
     minute(): number;
+	minutes(): number;
 	month(): number;
 	year(): number;
 	format(s: string): string;
@@ -986,6 +1025,7 @@ declare class EcobeeEvent {
 
 declare class Ecobee {
 	static motionDetected: EcobeeEvent;
+	static climateNextTransition: Action;
 }
 
 declare class Aquanta {
@@ -1059,4 +1099,58 @@ declare class EmailDigest {
 
 declare class Qapital {
 	static saveTowardGoal: Action;
+}
+
+declare class Trello {
+	static createCard: Action;
+}
+
+declare class Pushbullet {
+	static sendNote: Action;
+	static sendLink: Action;
+}
+
+declare class Groupme {
+	static postMessage: Action;
+}
+
+declare class Nuki {
+	static openDoor: Action;
+}
+
+declare class IosHealthObj {
+	setFoodDescription(s: string);
+	setNumberOfCalories(s: string);
+	skip(s: string);
+}
+
+declare class IosHealth {
+	static logCaloriesConsumed: IosHealthObj;
+}
+
+declare class TraktMovies {
+	length: number;
+}
+
+declare class Trakt {
+	static recommendedMovies: TraktMovies;
+}
+
+declare class YelpObj {
+	length: number;
+}
+
+declare class Yelp {
+	static searchBusiness: YelpObj;
+}
+
+declare class FoursquareCheckin {
+	Shout: string;
+	VenueUrl: string;
+	VenueMapImageUrl: string;
+	CheckinDate: string;
+}
+
+declare class Foursquare {
+	static anyNewCheckin: FoursquareCheckin;
 }
