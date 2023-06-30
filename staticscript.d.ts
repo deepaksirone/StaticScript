@@ -320,6 +320,8 @@ declare class Tweet {
 	CreatedAt: string;
 	Text: string;
 	LinkToTweet: string;
+	TweetEmbedCode: string;
+	UserName: string;
 
 }
 

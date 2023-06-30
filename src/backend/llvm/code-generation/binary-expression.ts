@@ -393,6 +393,42 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
 	    	const left = buildFromExpression(node.left, ctx, builder);
 		    const right = buildFromExpression(node.right, ctx, builder);
 
+            if (left.getType() != right.getType()) {
+                throw new UnsupportedError(node, "OR operation on different type of operands")
+            }
+
+            // Handle let v = var || "string";
+            switch (left.getType()) {
+                case ValueTypeEnum.STRING: {
+                    const positiveBlock = llvm.BasicBlock.create(ctx.llvmContext, "str_phi.true");
+                    const negativeBlock = llvm.BasicBlock.create(ctx.llvmContext, "str_phi.false");
+                    ctx.scope.enclosureFunction.llvmFunction.addBasicBlock(positiveBlock);
+                    ctx.scope.enclosureFunction.llvmFunction.addBasicBlock(negativeBlock);
+
+                    const bb = builder.getInsertBlock();
+
+                    let l = builder.createPtrToInt(left.getValue(), llvm.Type.getInt64Ty(ctx.llvmContext));
+                    let r = builder.createPtrToInt(llvm.ConstantPointerNull.get(llvm.Type.getInt8PtrTy(ctx.llvmContext)), llvm.Type.getInt64Ty(ctx.llvmContext));
+                    let null_cmp = builder.createICmpNE(l, r);
+
+
+                    builder.createCondBr(null_cmp, positiveBlock, negativeBlock);
+
+
+                    builder.setInsertionPoint(negativeBlock);
+                    builder.createBr(positiveBlock);
+
+                    builder.setInsertionPoint(positiveBlock);
+                    let phi = builder.createPhi(left.getValue().type, 2, "str_phi.phi");
+                    phi.addIncoming(left.getValue(), bb);
+                    phi.addIncoming(right.getValue(), negativeBlock);
+
+                    return new Primitive(
+                        phi, ValueTypeEnum.STRING
+                    )
+                }
+            } 
+
 		    return new Primitive(
 		        builder.createOr(
 			    loadIfNeeded(left, builder), 
