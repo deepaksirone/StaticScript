@@ -54,6 +54,7 @@ export class PrefixUnaryExpressionCodeGenerator implements NodeGenerateInterface
             }
             case ts.SyntaxKind.ExclamationToken : {
                 const left = buildFromExpression(node.operand, ctx, builder);
+                console.log("[Exclamation Token Type] " + left.getType())
                 switch (left.getType()) {
                     case ValueTypeEnum.BOOLEAN: {
                         return new Primitive(

@@ -28,6 +28,7 @@ interface Number {
 	toString(): string;
 	toFixed(n: number): string;
 	constructor(): number;
+	constructor(n: number): number;
 }
 
 interface Object {}
@@ -35,6 +36,7 @@ interface Object {}
 interface RegExp {
 	test(s: string): boolean;
 	exec(s: string): Array<string>;
+	constructor(s: string, g: string);
 }
 
 interface String {
@@ -56,11 +58,14 @@ interface String {
 	toUpperCase(): string;
 	toLowerCase(): string;
 	substr(start: number, end: number): string;
+	substr(start_to_idx: number): string;
 	search(t: RegExp): number;
 	search(s: string): number;
 	lastIndexOf(s: string): number;
 	substring(n: number): string;
 	substring(s: number, e: number): string;
+	toString(): string;
+	charCodeAt(n : number): number;
 }
 
 interface Array<T> {
@@ -68,6 +73,7 @@ interface Array<T> {
 	join(s: string): string;
 	toString(): string;
 	indexOf(s: number): number;
+	indexOf(s: string): number;
 	slice(start: number, end: number): Array<string>;
 }
 
@@ -81,8 +87,11 @@ declare function parseFloat(s: number): number;
 declare function String(n: number): string;
 declare function Number(): number;
 declare function Number(s: string): number;
+declare function Number(n: number): number;
 declare function RegExp(s: string): RegExp;
 declare function RegExp(r: RegExp): RegExp;
+declare function RegExp(s: string, g: string): RegExp;
+declare function encodeURIComponent(s: string): string;
 
 
 declare function encodeURI(s: string): string;
@@ -105,6 +114,10 @@ declare class Action {
 	setDuration(s: string);
 	setSubject(s: string);
 	setBody(s: string);
+	setFileName(s: string);
+	setFilename(s: string);
+	setAdvancedOptions(s: string);
+	setQuantity(s: string);
 }
 
 declare class MomentJS {
@@ -116,9 +129,11 @@ declare class MomentJS {
 	hour(): number;
 	hour(n: number): MomentJS;
 	minute(n: number): MomentJS;
+	minute(): number;
 	minutes(): number;
 	hours(): number;
 	weekday(): number;
+	static tz(s: string): MomentJS;
 	constructor();
 	constructor(s: string);
 }
@@ -130,9 +145,18 @@ declare function moment(s: string, format: string): MomentJS;
 
 declare class Date {
 	constructor();
+	constructor(n: number);
 	constructor(d: Date);
+	constructor(year: number, month: number, day: number);
 	constructor(s: string);
 	getDay(): number;
+	getDate(): number;
+	getHours(): number;
+	setFullYear(n: number, n1: number, n3: number): number;
+	getFullYear(): number;
+	getTime(): number;
+	getMonth(): number;
+	static parse(s: string): number;
 }
 
 declare class TriggerData {
@@ -148,6 +172,9 @@ declare class currentWeather {
 	Condition: string;
 	TodaysCondition: string;
 	LowTempFahrenheit: string;
+	SunriseAt: string;
+	SunsetAt: string;
+	CurrentCondition: string;
 }
 
 declare class Weather {
@@ -155,6 +182,7 @@ declare class Weather {
 	static currentWeatherAtTime: currentWeather;
 	static currentConditionIs: currentWeather;
 	static tomorrowsWeatherAtTime: currentWeather;
+	static currentWeather: currentWeather;
 }
 
 declare class placeAPhoneCallObj {
@@ -162,11 +190,20 @@ declare class placeAPhoneCallObj {
 	CallLength: string;
 	ContactName: string;
 	FromNumber: string;
+	ToNumber: string;
+}
+
+declare class Powerview { 
+	static executeSceneCollection: Action;
 }
 
 declare class AndroidPhone {
 	static placeAPhoneCall: placeAPhoneCallObj;
 	static receiveAPhoneCall: placeAPhoneCallObj;
+}
+
+declare class Clicksend {
+	static sendSms: Action;
 }
 
 declare class addDetailedEventObj {
@@ -187,12 +224,22 @@ declare class eventEndsObj {
 declare class quickAddEventObj {
 	skip();
 	setQuickAdd(s: string);
+	skip(s: string);
 }
 
+declare class Heatmiser {
+	static setTemp: Action;
+}
 declare class newEventAddedObj {
 	Starts: string;
 	Where: string;
 	Ends: string;
+	Title: string;
+}
+
+
+declare class Office365Calendar {
+	static createNewCalendarItem: Office365Obj;
 }
 
 declare class eventStartsObj {
@@ -239,12 +286,14 @@ declare class HueColor {
 	skip(s: string);
 	skip();
 	setColor(s: string);
+	setBrightness(s: string);
 }
 
 declare class Hue {
 	static setColorAllHue: HueColor;
 	static setScene: Action;
 	static turnOnAllHue: Action;
+	static turnOffAllHue: Action;
 	static toggleAllHue: Action;
 	static setBrightnessAllHue: HueColor;
 }
@@ -256,6 +305,11 @@ declare class IfNotifications {
 
 declare class Skybell {
 	static record60sOfVideo: Action;
+}
+
+declare class Telldus {
+	static turnOnADevice: Action;
+	static turnOffADevice: Action;
 }
 
 declare class sendMeEmailObj {
@@ -300,6 +354,7 @@ declare class Spotify {
 
 declare class Gmail {
 	static sendAnEmail: Action;
+	static sendYourselfAnEmail: sendMeEmailObj;
 }
 
 declare class Trigger {
@@ -311,6 +366,19 @@ declare class Trigger {
 	static CreatedAt: string;
 	static Description: string;
 	static AddedItem: string;
+	static Filename: string;
+}
+
+declare class NetatmoSecurity {
+	static sethomeaway: Action;
+}
+
+declare class eventObj {
+	EventCity: string;
+}
+
+declare class Songkick {
+	static newEventFromTrackedArtist: eventObj;
 }
 
 declare class Tweet {
@@ -322,6 +390,7 @@ declare class Tweet {
 	LinkToTweet: string;
 	TweetEmbedCode: string;
 	UserName: string;
+	FirstLinkUrl: string;
 
 }
 
@@ -331,16 +400,24 @@ declare class newTweetWithImage {
 	skip();
 }
 
+declare class Wiz {
+	static turnOn: Action;
+}
+
 declare class Twitter {
 	static postNewTweet: Tweet;
 	static postNewTweetWithImage: newTweetWithImage;
 	static newTweetByUser: Tweet;
 	static newTweetFromSearch: Tweet;
+	static newFavoriteTweet: Tweet;
+	static newTweetByYou: Tweet;
 }
 
 declare class FeedEntry {
 	EntryTitle: string;
 	EntryContent: string;
+	EntryImageUrl: string;
+	EntryUrl: string;
 }
 
 declare class Feed {
@@ -357,21 +434,35 @@ declare class sendMsgObj {
 
 declare class Telegram {
 	static sendMessage: sendMsgObj;
+	static sendPhoto: photoFromUrl;
 
+}
+
+declare class HelloWorldObj {
+	OrderCloserDailySalesCount: string;
+}
+
+declare class HelloWorld {
+	static newSale: HelloWorldObj;
+}
+
+declare class EvernoteTag {
+	localeCompare(s: string): number;
 }
 
 declare class EvernoteNote {
 	skip();
 	skip(s: string);
 	setTitle(s: string);
-	
-
+	setTags(s: string);
+	Tags: EvernoteTag;
 }
 
 declare class Evernote {
 	static appendToNote: EvernoteNote;
 	static appendChecklistItem: EvernoteNote;
 	static createNote: EvernoteNote;
+	static newNoteInNotebook: EvernoteNote;
 }
 
 declare class GooglePhoto {
@@ -385,30 +476,47 @@ declare class GoogleDrive {
 
 declare class photoFromUrl {
 	setPhotoUrl(s: string);
+	setCaption(s: string);
 	setTitle(s: string);
 	setDescription(s: string);
 	setTags(s: string);
+	skip();
+	SourceUrl: string;
+	Title: string;
 }
 
 
 declare class Flickr {
 	static uploadPublicPhotoFromUrl: photoFromUrl;
+	static newFavoritePublicPhoto: photoFromUrl;
 }
 
 declare class TumblrPhotoPost {
 	setSourceUrl(s: string);
 	setCaption(s: string);
 	setTags(s: string);
+	PhotoFullUrl: string;
 	skip();
+}
+
+declare class ohmHourObj {
+	OhmHourEnd: string;
+	OhmHourStart: string;
+}
+
+declare class Ohmconnect {
+	static ohmHourStart: ohmHourObj;
 }
 
 declare class Tumblr {
 	static createPhotoPost: TumblrPhotoPost;
+	static newPhotoPost: TumblrPhotoPost;
 }
 
 declare class WemoSwitch {
 	static attributeSocketOnDiscrete: Action;
 	static attributeSocketOffDiscrete: Action;
+	static attributeSocketToggleDiscrete: Action;
 }
 
 
@@ -421,6 +529,7 @@ declare class Reddit {
 	static newHotPostInSubreddit: RedditPost;
 	static submitLinkReddit: Action;
 	static newPostInSubreddit: RedditPost;
+	static newLikeByYouReddit: RedditPost;
 }
 
 declare class Yeelight {
@@ -430,15 +539,22 @@ declare class Yeelight {
 
 declare class VideoDesc {
 	Title: string;
+	Url: string;
 }
 
 declare class YoutubeColorTier {
 	ColorTier: string;
 }
 
+declare class YoutubeObj {
+	Url: string;
+	Title: string;
+}
+
 declare class Youtube {
 	static newPublicVideoFromSubscriptions: VideoDesc;
 	static newSuperchat: YoutubeColorTier;
+	static newVideoUploadedYt: YoutubeObj;
 }
 
 declare class sensData {
@@ -476,6 +592,9 @@ declare class InstagramVideo {
 
 declare class InstagramPhoto {
 	CreatedAt: string;
+	Caption: string;
+	SourceUrl: string;
+	Url: string;
 }
 
 declare class Instagram {
@@ -574,6 +693,11 @@ declare class androidBluetooth {
 declare class AndroidNotification {
 	NotificationTitle: string;
 	ReceivedAt: string;
+	AppName: string;
+}
+
+declare class AndroidWallpaper {
+	setPhotoUrl(s: string);
 }
 
 declare class AndroidDevice {
@@ -581,6 +705,8 @@ declare class AndroidDevice {
 	static bluetoothConnected: androidBluetooth;
 	static playBestSong: Action;
 	static newNotificationFromApp: AndroidNotification;
+	static anyNewNotification: AndroidNotification;
+	static setWallpaper: AndroidWallpaper;
 }
 
 declare class AndroidMessage {
@@ -595,6 +721,10 @@ declare class AndroidMessages {
 
 declare class photoPost {
 	setTitle(s: string);
+	setSourceUrl(s: string);
+	setCaption(s: string);
+	setCategories(s: string);
+	setTags(s: string);
 }
 
 declare class Wordpress {
@@ -631,6 +761,15 @@ declare class Sms {
 declare class collarInfoClass {
 	CreatedAt: string;
 	Battery: string;
+	Temperature: string;
+}
+
+declare class SeatObj {
+	MaxSpeedLimit: string;
+}
+
+declare class Seat {
+	static testMaxSpeed: SeatObj;
 }
 
 declare class LinkMyPet {
@@ -696,6 +835,19 @@ declare class Ewelink {
 	static switchAction: EwelinkAction;
 	static plugAction: EwelinkAction;
 	static plugs3Action: EwelinkAction;
+	static switches4Action: EwelinkAction;
+}
+
+declare class Moretrees {
+	static plantTreeForSelf: Action;
+}
+
+declare class ParticleEvents {
+	EventContents: string;
+}
+
+declare class Particle {
+	static events: ParticleEvents;
 }
 
 declare class dataFromTheBea {
@@ -717,10 +869,13 @@ declare class PhoneCall {
 declare class TriggerWithOneTextObj {
 	TextField: string;
 	CreatedAt: string;
+	NumberField: string;
 }
 
 declare class GoogleAssistant {
 	static voiceTriggerWithOneTextIngredient: TriggerWithOneTextObj;
+	static voiceTriggerWithOneTextAndOneNumberIngredient: TriggerWithOneTextObj;
+	static voiceTriggerWithOneNumberIngredient: TriggerWithOneTextObj;
 }
 
 declare class WeatherObj {
@@ -743,6 +898,7 @@ declare class SlackPostChannel {
 	skip();
 	skip(s: string);
 	setMessage(s: string);
+	setTitle(s: string);
 }
 
 declare class Slack {
@@ -767,6 +923,7 @@ declare class PocketItem {
 declare class Pocket {
 	static readItLater: readLaterObj;
 	static newItemAddedPocket: PocketItem;
+	static newTaggedItemPocket: PocketItem;
 }
 
 declare class Line {
@@ -840,7 +997,16 @@ declare class DaikinOnlineController {
 
 declare class Smartlife {
 	static turnOn: Action;
+	static turnOff: Action;
 	static activateScene: Action;
+}
+
+declare class LightwaverfPower {
+	static switchOnSocket: Action;
+}
+
+declare class Magichue {
+	static poweron: Action;
 }
 
 declare class buttonNewCommandCommon {
@@ -961,6 +1127,14 @@ declare class Math {
     static random(): number;
     static abs(value: number): number;
     static ceil(val: number): number;
+	static PI: number;
+	static sin(n: number): number;
+	static cos(n: number): number;
+	static acos(n: number): number;
+	static asin(n: number): number;
+	static tan(n: number): number;
+	static atan(n: number): number;
+	
 }
 
 declare class Time {
@@ -968,18 +1142,26 @@ declare class Time {
 	hours(n: number): number;
 	hours(): number;
 	day(): number;
+	date(): number;
 	second(): number;
     minute(): number;
 	minutes(): number;
 	month(): number;
+	calendar(): number;
 	year(): number;
 	format(s: string): string;
     format(): string;
     weekday(): number;
     locale(s: string): Time;
     isoWeekday(): number;
+	isoWeek(): number;
 	isBetween(t1: MomentJS, t2: MomentJS): boolean;
+	isAfter(t: MomentJS): boolean;
+	isBefore(t: MomentJS): boolean;
     add(n: number, format: string): Time;
+	isLeapYear(): boolean;
+	get(s: string): number;
+	subtract(s: string, s1: string): Time;
 }
 
 declare class Meta {
@@ -1002,6 +1184,15 @@ declare class TwitchVideo {
 
 declare class Twitch {
 	static newVideoByYou: TwitchVideo;
+	static newVideoByChannelYouFollow: TwitchVideo;
+}
+
+declare class GreenLightSignalObj {
+	Co2Index: string;
+}
+
+declare class GreenLightSignal {
+	static co2Level: GreenLightSignalObj;
 }
 
 declare class Meross {
@@ -1017,17 +1208,38 @@ declare class IosReadingList {
 	static createReadingListItem: Action;
 }
 
+declare class Woopla {
+	static ttsCall: Action;
+}
+
+declare class StatusObj {
+	CurrentStatus: string;
+}
+
 declare class Irobot {
 	static dockRobot: Action;
+	static getCurrentStatus: StatusObj;
+	static resumeRobot: Action;
 }
 
 declare class EcobeeEvent {
 	EventType: string;
+	holdHoldhours: Action;
 }
 
 declare class Ecobee {
 	static motionDetected: EcobeeEvent;
 	static climateNextTransition: Action;
+	static holdHoldhours: Action;
+}
+
+declare class AmbientWeatherObj {
+	Date: string;
+	Rainfall: string; 
+}
+
+declare class AmbientWeather {
+	static dailyraininGt: AmbientWeatherObj;
 }
 
 declare class Aquanta {
@@ -1037,6 +1249,18 @@ declare class Aquanta {
 
 declare class Office365Obj {
 	Subject: string;
+	setSubject(s: string);
+	setLocation(s: string);
+	setTime(s: string);
+	setBody(s: string);
+}
+
+declare class CaavoObj {
+	Text: string;
+}
+
+declare class Caavo {
+	static voiceSearch: CaavoObj;
 }
 
 declare class Office365Mail {
@@ -1068,6 +1292,11 @@ declare class WinkShortcuts {
 declare class PropellerForecasts {
 	ForecastRiskLevel: string;
 	LastForecastRiskLevel: string;
+	PostalCode: string;
+}
+
+declare class FacebookMessenger {
+	static sendMessage: Action;
 }
 
 declare class AirByPropeller {
@@ -1088,6 +1317,7 @@ declare class Kasa {
 
 declare class Harmony {
 	static startActivity: Action;
+	static endActivity: Action;
 }
 
 declare class WemoLighting {
@@ -1097,6 +1327,24 @@ declare class WemoLighting {
 
 declare class EmailDigest {
 	static sendWeeklyEmail: Action;
+	static sendDailyEmail: Action;
+}
+
+declare class BouncieObj {
+	FuelEcon: string;
+	VehicleName: string;
+}
+
+declare class FinanceObj {
+	Price: string;
+}
+
+declare class Finance {
+	static historyOfClosingPrices: FinanceObj;
+}
+
+declare class Bouncie {
+	static fuelEcon: BouncieObj;
 }
 
 declare class Qapital {
@@ -1118,32 +1366,47 @@ declare class Groupme {
 
 declare class Nuki {
 	static openDoor: Action;
+	static lockDoor: Action;
 }
 
 declare class IosHealthObj {
 	setFoodDescription(s: string);
 	setNumberOfCalories(s: string);
+	setAsleepAt(s: string);
+	setDateSleepEnded(s: string);
 	skip(s: string);
 }
 
 declare class IosHealth {
 	static logCaloriesConsumed: IosHealthObj;
+	static logSleep: IosHealthObj;
 }
 
 declare class TraktMovies {
 	length: number;
+	ShowTitle: string;
+	EpisodeTitle: string;
+	EpisodeNumber: string;
+	EpisodeSeason: string;
+	MovieTitle: string;
 }
 
 declare class Trakt {
 	static recommendedMovies: TraktMovies;
+	static watchedEpisode: TraktMovies;
 }
 
 declare class YelpObj {
 	length: number;
+	BusinessName: string;
 }
 
 declare class Yelp {
 	static searchBusiness: YelpObj;
+}
+
+declare class Govee {
+	static lightBrightness: Action;
 }
 
 declare class FoursquareCheckin {
@@ -1155,4 +1418,61 @@ declare class FoursquareCheckin {
 
 declare class Foursquare {
 	static anyNewCheckin: FoursquareCheckin;
+}
+
+declare class Inoreader {
+	static markFolderAsRead: Action;
+}
+
+declare class Datadotworld {
+	static uploadFile: Action;
+}
+
+declare class Dropbox {
+	static addFileFromUrl: Action;
+	static createTextFileDb: Action;
+	static appendToTextFileDb: Action;
+}
+
+declare class kaiterraAqi {
+	Aqi: string;
+}
+
+declare class Kaiterra {
+	static lasereggAqi: kaiterraAqi;
+}
+
+declare class NanoleafObj {
+	setValue(s: string);
+}
+
+declare class Nanoleaf {
+	static changeColorRequest: NanoleafObj;
+}
+
+declare class Wyzecam {
+	static lightTurnOn: Action;
+}
+
+declare class BeeminderDatapoint {
+	setDatapointValue(s: string);
+	DatapointValue: string;
+	setDatapointComment(s: string);
+
+}
+
+declare class Beeminder {
+	static datapointAdded: BeeminderDatapoint;
+	static addData: BeeminderDatapoint;
+}
+
+declare class taskObj {
+	Tags: string;
+	LinkToTask: string;
+	Name: string;
+	List: string;
+}
+
+declare class Rememberthemilk {
+	static taskCompleted: taskObj; 
 }

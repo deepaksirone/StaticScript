@@ -39,6 +39,7 @@ import {TypeOfExpressionCodeGenerator} from "./code-generation/typeof-expression
 import {PrefixUnaryExpressionCodeGenerator} from "./code-generation/prefix-unary-expression";
 import {ElementAccessExpressionGenerator} from "./code-generation/element-access-expression";
 import { TemplateExpressionCodeGenerator } from "./code-generation/template-expression";
+import { ConditionalExpressionCodeGenerator } from "./code-generation/conditional-expression";
 
 export function emitCondition(
     condition: ts.Expression,
@@ -129,7 +130,7 @@ function buildFromNullExpr(value: ts.NullLiteral,
     builder: llvm.IRBuilder): Value {
         return new Primitive(
             llvm.ConstantPointerNull.get(llvm.Type.getInt8PtrTy(ctx.llvmContext)),
-            ValueTypeEnum.ARRAY
+            ValueTypeEnum.NULL
         );
 }
 
@@ -388,6 +389,7 @@ function buildFromObjectLiteralExpression(block: ts.ObjectLiteralExpression, ctx
 }
 
 export function buildFromExpression(block: ts.Expression, ctx: Context, builder: llvm.IRBuilder, nativeType?: NativeType): Value {
+    console.log("Syntax type of block " + ts.SyntaxKind[block.kind])
     switch (block.kind) {
         case ts.SyntaxKind.NewExpression:
             return new NewExpressionGenerator().generate(<any>block, ctx, builder);
@@ -432,9 +434,14 @@ export function buildFromExpression(block: ts.Expression, ctx: Context, builder:
             return buildFromNullExpr(<any>block, ctx, builder);
         case ts.SyntaxKind.TemplateExpression:
             //FIXME: Implement Template Expression
-            return new TemplateExpressionCodeGenerator().generate(block as ts.TemplateExpression, ctx, builder); 
+            return new TemplateExpressionCodeGenerator().generate(block as ts.TemplateExpression, ctx, builder);
+        case ts.SyntaxKind.ConditionalExpression:
+            return new ConditionalExpressionCodeGenerator().generate(block as ts.ConditionalExpression, ctx, builder);
+        case ts.SyntaxKind.FirstTemplateToken:
+            return buildFromString((<ts.NoSubstitutionTemplateLiteral>block).text, ctx, builder)
         default:
 	    //console.trace();
+        
 	    console.log(`The node type: ${ts.SyntaxKind[block.kind]}`);
         //console.log(block)
         console.log((<any>block).templateSpans[0])
@@ -492,26 +499,28 @@ function generateAssignment(block: ts.VariableDeclaration, rhs: Value, ctx: Cont
 			break;
         case ValueTypeEnum.OBJECT:
         case ValueTypeEnum.BOOLEAN:
-		case ValueTypeEnum.DOUBLE:
+        case ValueTypeEnum.DOUBLE:
+            const loaded_val = loadIfNeeded(rhs, builder);
 			value = builder.createAlloca(
-                                        rhs.getValue().type,
+                                        loaded_val.type,
                                         undefined,
                                         <string>(<ts.Identifier>(block.name)).escapedText
                         );
 
                         builder.createStore(
-                                        rhs.getValue(),
+                                        loaded_val,
                                         value,
                                         false
                         );
 
                         return value;
 			break;
-        
+
 		default:
+            
 			// regular load and store
             console.log("Default case in load instruction");
-			const rhsVar = builder.createLoad(rhs.getValue());
+			const rhsVar = loadIfNeeded(rhs, builder);
 			value = builder.createAlloca(
                                         rhsVar.type,
                                         undefined,

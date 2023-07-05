@@ -9,6 +9,7 @@ export enum ValueTypeEnum {
     STRING = 'STRING',
     DOUBLE = 'DOUBLE',
     BOOLEAN = 'BOOLEAN',
+    NULL = 'NULL',
     //
     UNKNOWN = 'UNKNOWN',
     OBJECT = 'OBJECT',
@@ -23,7 +24,7 @@ export enum ValueTypeEnum {
 
 export function convertLLVMTypeToValueType(type: llvm.Type) {
     switch (type.typeID) {
-        case llvm.Type.TypeID.DoubleTyID:
+    case llvm.Type.TypeID.DoubleTyID:
             return ValueTypeEnum.DOUBLE;
 	case llvm.Type.TypeID.PointerTyID: {
 	    console.log("[convertLLVMTypeToValueType] Returning string type");
@@ -42,7 +43,15 @@ export function convertLLVMTypeToValueType(type: llvm.Type) {
 	    console.log("[convertLLVMTypeToValueType] Converting function type");
 	    return convertLLVMTypeToValueType(fnType.returnType);
 	}
-        default:
+
+    case llvm.Type.TypeID.IntegerTyID: {
+        let typ = type as llvm.IntegerType;
+        if (typ.getBitWidth() == 1) {
+            return ValueTypeEnum.BOOLEAN;
+        }
+    }
+
+    default:
             return ValueTypeEnum.UNKNOWN;
     }
 }

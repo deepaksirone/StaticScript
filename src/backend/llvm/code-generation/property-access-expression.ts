@@ -52,6 +52,7 @@ export class PropertyAccessExpressionCodeGenerator implements NodeGenerateInterf
 	let fullFnName = getFullnameFromProperty(node, ctx);
 	let typ = ctx.typeChecker.getTypeAtLocation(node);
 	let typ_parent = ctx.typeChecker.getTypeAtLocation(node.expression)
+	//console.log(typ)
 	console.log("The type of property: " + ((<any>typ).intrinsicName || typ.symbol.getEscapedName()));
 	//console.log(typ.symbol.getEscapedName())
 

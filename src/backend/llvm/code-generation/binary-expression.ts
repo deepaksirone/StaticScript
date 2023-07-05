@@ -10,19 +10,77 @@ import {buildFromExpression, loadIfNeeded} from "../index";
 import { assert } from "console";
 
 export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.BinaryExpression, Value> {
+    generateAssignment(lhs: Value, rhs: Value, ctx: Context, builder: llvm.IRBuilder) : Value {
+        var value: llvm.Value;
+        switch (rhs.getType()) {
+            case ValueTypeEnum.STRING: {
+
+                    // Propagate new variables
+                    const rhsVar = loadIfNeeded(rhs, builder);  
+                    builder.createStore(
+                                            rhsVar,
+                                            lhs.getValue(),
+                                            false
+                                    );
+                    return lhs;
+            }
+    
+                break;
+            case ValueTypeEnum.OBJECT:
+            case ValueTypeEnum.BOOLEAN:
+            case ValueTypeEnum.DOUBLE:
+                const loaded_val = loadIfNeeded(rhs, builder);
+                builder.createStore(
+                        loaded_val,
+                        lhs.getValue(),
+                        false
+                );
+    
+                return lhs;
+
+            case ValueTypeEnum.ARRAY: {
+                const loaded_val = builder.createLoad(rhs.getValue());
+                builder.createStore(
+                        loaded_val,
+                        lhs.getValue(),
+                        false
+                );
+    
+                return lhs;
+            }
+    
+            default:
+                
+                // regular load and store
+                console.log("[BinExpr GenAssgn] Default case in load instruction");
+                const rhsVar = loadIfNeeded(rhs, builder);
+                builder.createStore(
+                    rhsVar,
+                    lhs.getValue(),
+                    false
+                );
+                
+                return lhs;
+
+        }
+    
+        return null
+    }
+
     generate(node: ts.BinaryExpression, ctx: Context, builder: llvm.IRBuilder): Value {
         switch (node.operatorToken.kind) {
             case ts.SyntaxKind.EqualsToken: {
                 const left = buildFromExpression(node.left, ctx, builder);
                 const right = buildFromExpression(node.right, ctx, builder);
-
-                builder.createStore(
+                /*builder.createStore(
                     right.getValue(),
                     left.getValue(),
                     false
                 );
 
-                return left;
+                return left;*/
+
+                return this.generateAssignment(left, right, ctx, builder);
             }
             /**
              * This section resolve exression with equals operator
@@ -134,7 +192,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                 const left = buildFromExpression(node.left, ctx, builder);
                 const right = buildFromExpression(node.right, ctx, builder);
 
-                if (left.getType() != right.getType()) {
+                if (left.getType() != ValueTypeEnum.NULL && right.getType() != ValueTypeEnum.NULL && left.getType() != right.getType()) {
                     console.log("LHS Type: " + left.getType());
                     console.log("RHS Type: " + right.getType());
                     
@@ -179,7 +237,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                                 builder.createICmpEQ(
                                     loadIfNeeded(left, builder),
                                     loadIfNeeded(right, builder)
-                                )
+                                ), ValueTypeEnum.BOOLEAN
                             );
                         }
                         
@@ -189,7 +247,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                                 builder.createFCmpOEQ(
                                     loadIfNeeded(left, builder),
                                     loadIfNeeded(right, builder)
-                                )
+                                ), ValueTypeEnum.BOOLEAN
                             );
                         }
                     }
@@ -394,7 +452,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
 		    const right = buildFromExpression(node.right, ctx, builder);
 
             if (left.getType() != right.getType()) {
-                throw new UnsupportedError(node, "OR operation on different type of operands")
+                throw new UnsupportedError(node, "OR operation on different type of operands" + left.getType() + " " + right.getType())
             }
 
             // Handle let v = var || "string";
@@ -426,6 +484,24 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
                     return new Primitive(
                         phi, ValueTypeEnum.STRING
                     )
+                }
+
+                case ValueTypeEnum.ARRAY: {
+                    let l = builder.createPtrToInt(left.getValue(), llvm.Type.getInt64Ty(ctx.llvmContext));
+                    let nul = builder.createPtrToInt(llvm.ConstantPointerNull.get(llvm.Type.getInt8PtrTy(ctx.llvmContext)), llvm.Type.getInt64Ty(ctx.llvmContext));
+                    let r = builder.createPtrToInt(right.getValue(), llvm.Type.getInt64Ty(ctx.llvmContext));
+                    let null_cmp_l = builder.createICmpNE(l, nul);
+                    let null_cmp_r = builder.createICmpNE(r, nul);
+
+                    return new Primitive(
+                        builder.createOr(
+                        null_cmp_l,
+                        null_cmp_r, 
+                        "or"
+                        ),
+                        ValueTypeEnum.BOOLEAN
+                    );
+                    
                 }
             } 
 
@@ -460,7 +536,7 @@ export class BinaryExpressionCodeGenerator implements NodeGenerateInterface<ts.B
 		    const right = buildFromExpression(node.right, ctx, builder);
 
 
-            if (left.getType() != right.getType()) {
+            if (left.getType() != ValueTypeEnum.NULL && right.getType() != ValueTypeEnum.NULL && left.getType() != right.getType()) {
                 console.log("LHS Type: " + left.getType());
                 console.log("RHS Type: " + right.getType());
                 //TODO: Handle Type conversions
