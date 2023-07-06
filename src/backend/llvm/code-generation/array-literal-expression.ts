@@ -26,8 +26,9 @@ export class ArrayLiteralExpressionCodeGenerator implements NodeGenerateInterfac
         // Store a Null Pointer at the end
         const ptr_typ = nativeType.getType() as llvm.PointerType;
         const arr_typ = ptr_typ.elementType as llvm.ArrayType; 
-        const arrayType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayLLVMType(arr_typ.elementType, node.elements.length, ctx, `array<${nativeType.getType().toString()}>`);
-
+        //const arrayType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayLLVMType(arr_typ.elementType, node.elements.length, ctx, `array<${nativeType.getType().toString()}>`);
+        // Hack: FIXME to add support for variable length arrays
+        const arrayType = ArrayLiteralExpressionCodeGenerator.buildTypedArrayLLVMType(arr_typ.elementType, 100, ctx, `array<${nativeType.getType().toString()}>`);
 	    console.log(`Array native type: ${arrayType.toString()}`);
 
         const allocate = builder.createAlloca(

@@ -75,6 +75,8 @@ interface Array<T> {
 	indexOf(s: number): number;
 	indexOf(s: string): number;
 	slice(start: number, end: number): Array<string>;
+	push(s: string, s2: string);
+	push(s: string);
 }
 
 declare function puts(str: string): void;
@@ -280,6 +282,7 @@ declare class awayFromHomeObj {
 declare class NestThermostat {
 	static setTemperature: Action;
 	static awayFromHome: awayFromHomeObj;
+	static homeFromAway: NestHome;
 }
 
 declare class HueColor {
@@ -530,6 +533,7 @@ declare class Reddit {
 	static submitLinkReddit: Action;
 	static newPostInSubreddit: RedditPost;
 	static newLikeByYouReddit: RedditPost;
+	static newTopPostInSubreddit: RedditPost;
 }
 
 declare class Yeelight {
@@ -969,15 +973,22 @@ declare class Lifx {
 	static activateScene: Action;
 }
 
+declare class NestHome {
+	HomeName: string;
+	SetAt: string;
+
+}
 
 declare class NestThermostatPoint {
 	TemperatureSetpoint: string;
+	static homeFromAway: NestHome;
 	skip();
 }
 
 declare class NetatmoThermostat { 
 	static getsetpointmanual: NestThermostatPoint;
 	static setpointmodemanual: NestThermostatPoint;
+	static homeFromAway: NestHome;
 }
 
 declare class DaikinOnControl {
@@ -1161,6 +1172,7 @@ declare class Time {
     add(n: number, format: string): Time;
 	isLeapYear(): boolean;
 	get(s: string): number;
+	utc(): Time;
 	subtract(s: string, s1: string): Time;
 }
 
@@ -1383,7 +1395,7 @@ declare class IosHealth {
 }
 
 declare class TraktMovies {
-	length: number;
+	len: number;
 	ShowTitle: string;
 	EpisodeTitle: string;
 	EpisodeNumber: string;
